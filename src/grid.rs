@@ -2,8 +2,7 @@ use image::{DynamicImage, GenericImage, GrayImage, Luma, Pixel};
 
 use num_traits::ToPrimitive;
 
-use Point;
-use PointPath;
+use point::{Point, PointPath};
 
 pub struct EnergyGrid {
     rows: Vec<Vec<usize>>,
@@ -37,7 +36,8 @@ impl EnergyGrid {
         (width, height)
     }
 
-    fn get(&self, x: usize, y: usize) -> usize {
+    fn get(&self, point: Point) -> usize {
+        let (x, y) = *point;
         self.rows[y][x]
     }
 
@@ -45,11 +45,11 @@ impl EnergyGrid {
         unimplemented!()
     }
 
-    pub fn add_path(&mut self, path: &PointPath) {
+    pub fn add_path(&mut self, path: &[Point]) {
         unimplemented!()
     }
 
-    pub fn remove_path(&mut self, path: &PointPath) {
+    pub fn remove_path(&mut self, path: &[Point]) {
         unimplemented!()
     }
 
@@ -68,8 +68,9 @@ impl EnergyGrid {
 
         for y in 0..height {
             for x in 0..width {
+                let point = Point { x, y };
                 let ratio: f64 = u8::max_value() as f64 / darkest_value as f64;
-                let grid_value: usize = self.get(x, y);
+                let grid_value: usize = self.get(point);
                 let value = grid_value as f64 * ratio;
                 let pixel = Luma { data: [value as u8] };
                 image.put_pixel(x as u32, y as u32, pixel);

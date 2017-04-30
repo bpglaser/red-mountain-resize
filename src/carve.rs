@@ -1,13 +1,12 @@
 use std::path::Path;
 
 use image;
-use image::DynamicImage;
+use image::{DynamicImage, GenericImage};
 
 use ArgConfig;
 use BoxResult;
 use EnergyGrid;
-use Point;
-use PointPath;
+use point::{Point, PointPath};
 
 pub fn run(config: ArgConfig) -> BoxResult<()> {
     let image = image::open(&config.file_path)?;
@@ -51,11 +50,25 @@ impl Carver {
         self.energy.remove_path(&modified);
     }
 
-    fn duplicate_path(&mut self, path: &PointPath) -> PointPath {
+    fn duplicate_path(&mut self, path: &PointPath) -> Vec<Point> {
         unimplemented!()
     }
 
-    fn erase_path(&mut self, path: &PointPath) -> PointPath {
+    fn erase_path(&mut self, path: &PointPath) -> Vec<Point> {
+        for y in 0..self.image.height() as usize {
+            let point = path[y];
+            self.shift_row(point);
+        }
+        self.trim_last_column();
+        path.adjacent_points()
+    }
+
+    fn shift_row(&mut self, point: Point) {
+        for x in point.x..self.image.width() as usize - 2 {}
+        unimplemented!()
+    }
+
+    fn trim_last_column(&mut self) {
         unimplemented!()
     }
 
