@@ -16,21 +16,61 @@ pub fn run(config: ArgConfig) -> BoxResult<()> {
     Ok(())
 }
 
-struct Carver<I, P>
-    where I: GenericImage<Pixel = P>,
-          P: Pixel
-{
+struct Carver<I: GenericImage> {
     image: I,
-    energy: Grid,
+    energy: EnergyGrid,
 }
 
-impl<I, P> Carver<I, P>
-    where I: GenericImage<Pixel = P>,
-          P: Pixel
-{
+impl<I: GenericImage> Carver<I> {
     fn new(image: I) -> Self {
-        let energy = Grid::from_image(&image);
+        let energy = EnergyGrid::from_image(&image);
         Carver { image, energy }
+    }
+
+    fn resize_horizontal(&mut self, distance: isize) {
+        if distance < 0 {
+            for _ in 0..-distance {
+                self.remove_seam();
+            }
+        } else {
+            for _ in 0..distance {
+                self.add_seam();
+            }
+        }
+    }
+
+    fn add_seam(&mut self) {
+        let path = self.energy.find_path();
+        let modified = self.duplicate_path(&path);
+        self.energy.add_path(&modified);
+    }
+
+    fn remove_seam(&mut self) {
+        let path = self.energy.find_path();
+        let modified = self.erase_path(&path);
+        self.energy.remove_path(&modified);
+    }
+
+    fn duplicate_path(&mut self, path: &PointPath) -> PointPath {
+        unimplemented!()
+    }
+
+    fn erase_path(&mut self, path: &PointPath) -> PointPath {
+        unimplemented!()
+    }
+
+    fn resize_vertical(&mut self, distance: isize) {
+        self.rotate_clockwise();
+        self.resize_horizontal(distance);
+        self.rotate_counterclockwise();
+    }
+
+    fn rotate_clockwise(&mut self) {
+        unimplemented!()
+    }
+
+    fn rotate_counterclockwise(&mut self) {
+        unimplemented!()
     }
 
     fn save_energy_image<T: AsRef<Path>>(&self, path: T) {
@@ -38,12 +78,15 @@ impl<I, P> Carver<I, P>
     }
 }
 
-struct Grid {
+type Point = (usize, usize);
+type PointPath = Vec<Point>;
+
+struct EnergyGrid {
     rows: Vec<Vec<usize>>,
     darkest_value: usize,
 }
 
-impl Grid {
+impl EnergyGrid {
     fn from_image<I: GenericImage>(image: &I) -> Self {
         let mut darkest_value = 0;
         let mut rows = vec![]; // todo linked list? avoid shifts when updating?
@@ -58,7 +101,7 @@ impl Grid {
             }
             rows.push(row);
         }
-        Grid {
+        EnergyGrid {
             rows,
             darkest_value,
         }
@@ -72,6 +115,18 @@ impl Grid {
 
     fn get(&self, x: usize, y: usize) -> usize {
         self.rows[y][x]
+    }
+
+    fn find_path(&self) -> PointPath {
+        unimplemented!()
+    }
+
+    fn add_path(&mut self, path: &PointPath) {
+        unimplemented!()
+    }
+
+    fn remove_path(&mut self, path: &PointPath) {
+        unimplemented!()
     }
 
     fn as_image(&self) -> GrayImage {
