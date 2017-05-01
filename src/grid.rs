@@ -3,10 +3,12 @@ use image::{DynamicImage, GenericImage, GrayImage, Luma, Pixel};
 use num_traits::ToPrimitive;
 
 use point::{Point, PointPath};
+use self::Rotation::*;
 
 pub struct EnergyGrid {
     rows: Vec<Vec<usize>>,
     darkest_value: usize,
+    rotation: Rotation,
 }
 
 impl EnergyGrid {
@@ -27,6 +29,7 @@ impl EnergyGrid {
         EnergyGrid {
             rows,
             darkest_value,
+            rotation: Default,
         }
     }
 
@@ -37,7 +40,7 @@ impl EnergyGrid {
     }
 
     fn get(&self, point: Point) -> usize {
-        let (x, y) = *point;
+        let (x, y) = point.as_tuple();
         self.rows[y][x]
     }
 
@@ -54,11 +57,11 @@ impl EnergyGrid {
     }
 
     pub fn rotate_clockwise(&mut self) {
-        unimplemented!()
+        self.rotation = self.rotation.clockwise();
     }
 
     pub fn rotate_counterclockwise(&mut self) {
-        unimplemented!()
+        self.rotation = self.rotation.counterclockwise();
     }
 
     pub fn as_image(&self) -> GrayImage {
@@ -113,4 +116,32 @@ fn square_gradient(image: &DynamicImage, x1: u32, y1: u32, x2: u32, y2: u32) -> 
         sum += (a - b).abs().pow(2); // Squared abs difference
     }
     sum as usize
+}
+
+#[derive(Clone, Copy)]
+enum Rotation {
+    Default,
+    Deg90,
+    Deg180,
+    Deg270,
+}
+
+impl Rotation {
+    fn clockwise(&self) -> Rotation {
+        match *self {
+            Default => Deg270,
+            Deg90 => Default,
+            Deg180 => Deg90,
+            Deg270 => Deg180,
+        }
+    }
+
+    fn counterclockwise(&self) -> Rotation {
+        match *self {
+            Default => Deg90,
+            Deg90 => Deg180,
+            Deg180 => Deg270,
+            Deg270 => Default,
+        }
+    }
 }

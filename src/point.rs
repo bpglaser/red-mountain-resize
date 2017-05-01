@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::ops::{Deref, Index};
+use std::ops::Index;
 
 #[derive(Clone,Copy)]
 pub struct Point {
@@ -8,6 +8,14 @@ pub struct Point {
 }
 
 impl Point {
+    pub fn as_tuple(&self) -> (usize, usize) {
+        (self.x, self.y)
+    }
+
+    pub fn as_u32_tuple(&self) -> (u32, u32) {
+        (self.x as u32, self.y as u32)
+    }
+
     fn adjacent(&self) -> (Point, Point) {
         let left = Point {
             x: self.x - 1,
@@ -18,14 +26,6 @@ impl Point {
             y: self.y,
         };
         (left, right)
-    }
-}
-
-impl Deref for Point {
-    type Target = (usize, usize);
-
-    fn deref(&self) -> &Self::Target {
-        unimplemented!()
     }
 }
 

@@ -28,9 +28,11 @@ impl Carver {
 
     fn resize_horizontal(&mut self, distance: isize) {
         if distance < 0 {
-            for _ in 0..-distance {
+            let distance = -distance as usize;
+            for _ in 0..distance {
                 self.remove_seam();
             }
+            self.reduce_image_size(distance);
         } else {
             for _ in 0..distance {
                 self.add_seam();
@@ -59,17 +61,20 @@ impl Carver {
             let point = path[y];
             self.shift_row(point);
         }
-        self.trim_last_column();
         path.adjacent_points()
     }
 
     fn shift_row(&mut self, point: Point) {
-        for x in point.x..self.image.width() as usize - 2 {}
-        unimplemented!()
+        let (x, y) = point.as_u32_tuple();
+        for x in x..self.image.width() - 2 {
+            let right_pixel = self.image.get_pixel(x + 1, y);
+            self.image.put_pixel(x, y, right_pixel);
+        }
     }
 
-    fn trim_last_column(&mut self) {
-        unimplemented!()
+    fn reduce_image_size(&mut self, distance: usize) {
+        let (width, height) = self.image.dimensions();
+        self.image = self.image.crop(0, 0, width - distance as u32, height);
     }
 
     fn resize_vertical(&mut self, distance: isize) {
