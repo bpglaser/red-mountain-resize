@@ -7,6 +7,7 @@ use self::Rotation::*;
 
 pub struct EnergyGrid {
     rows: Vec<Vec<usize>>,
+    invalid: Vec<Point>,
     darkest_value: usize,
     rotation: Rotation,
 }
@@ -28,6 +29,7 @@ impl EnergyGrid {
         }
         EnergyGrid {
             rows,
+            invalid: vec![],
             darkest_value,
             rotation: Default,
         }
@@ -53,7 +55,7 @@ impl EnergyGrid {
     }
 
     pub fn remove_path(&mut self, path: &[Point]) {
-        unimplemented!()
+        
     }
 
     pub fn rotate_clockwise(&mut self) {
@@ -122,26 +124,20 @@ fn square_gradient(image: &DynamicImage, x1: u32, y1: u32, x2: u32, y2: u32) -> 
 enum Rotation {
     Default,
     Deg90,
-    Deg180,
-    Deg270,
 }
 
 impl Rotation {
     fn clockwise(&self) -> Rotation {
         match *self {
-            Default => Deg270,
             Deg90 => Default,
-            Deg180 => Deg90,
-            Deg270 => Deg180,
+            _ => panic!("Invalid rotation"),
         }
     }
 
     fn counterclockwise(&self) -> Rotation {
         match *self {
             Default => Deg90,
-            Deg90 => Deg180,
-            Deg180 => Deg270,
-            Deg270 => Default,
+            _ => panic!("Invalid rotation"),
         }
     }
 }

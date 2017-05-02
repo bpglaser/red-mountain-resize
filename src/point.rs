@@ -16,6 +16,7 @@ impl Point {
         (self.x as u32, self.y as u32)
     }
 
+    // Returns points to the left and right of itself.
     fn adjacent(&self) -> (Point, Point) {
         let left = Point {
             x: self.x - 1,
