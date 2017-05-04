@@ -54,9 +54,7 @@ impl EnergyGrid {
         unimplemented!()
     }
 
-    pub fn remove_path(&mut self, path: &[Point]) {
-        
-    }
+    pub fn remove_path(&mut self, path: &[Point]) {}
 
     pub fn rotate_clockwise(&mut self) {
         self.rotation = self.rotation.clockwise();

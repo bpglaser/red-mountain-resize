@@ -6,8 +6,7 @@ struct PixelEnergyPoint<P: Pixel> {
     path_energy: usize,
 }
 
-impl<P: Pixel> PixelEnergyPoint<P> {
-}
+impl<P: Pixel> PixelEnergyPoint<P> {}
 
 struct EnergyGrid<P: Pixel> {
     points: Vec<Vec<PixelEnergyPoint<P>>>,
@@ -25,7 +24,11 @@ impl<P: Pixel> EnergyGrid<P> {
                 let pixel = image.get_pixel(x, y);
                 let energy = 0;
                 let path_energy = 0;
-                let pep = PixelEnergyPoint { pixel, energy, path_energy };
+                let pep = PixelEnergyPoint {
+                    pixel,
+                    energy,
+                    path_energy,
+                };
                 row.push(pep);
             }
             rows.push(row);

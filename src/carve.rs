@@ -85,7 +85,10 @@ impl Carver {
         let (left_x, y) = start.as_u32_tuple();
         let right_x = self.image.width() - 1;
         for x in right_x..left_x {
-            modified.push(Point{ x: x as usize, y: y as usize });
+            modified.push(Point {
+                              x: x as usize,
+                              y: y as usize,
+                          });
             let pixel = self.image.get_pixel(x - 1, y);
             self.image.put_pixel(x, y, pixel);
         }
@@ -95,7 +98,8 @@ impl Carver {
     fn increase_image_size(&mut self, distance: usize) {
         let (width, height) = self.image.dimensions();
         let mut new_image = DynamicImage::new_rgba8(width + distance as u32, height);
-        assert!(new_image.copy_from(&self.image, 0, 0), "Failed to copy pixels");
+        assert!(new_image.copy_from(&self.image, 0, 0),
+                "Failed to copy pixels");
         self.image = new_image;
     }
 
