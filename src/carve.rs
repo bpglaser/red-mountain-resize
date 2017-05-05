@@ -5,7 +5,7 @@ use image::{DynamicImage, GenericImage};
 
 use ArgConfig;
 use BoxResult;
-use EnergyGrid;
+use Grid;
 use point::{Point, PointPath};
 
 pub fn run(config: ArgConfig) -> BoxResult<()> {
@@ -18,13 +18,12 @@ pub fn run(config: ArgConfig) -> BoxResult<()> {
 
 struct Carver {
     image: DynamicImage,
-    energy: EnergyGrid,
+    grid: Grid<PixelEnergyPoint>,
 }
 
 impl Carver {
     fn new(image: DynamicImage) -> Self {
-        let energy = EnergyGrid::from_image(&image);
-        Carver { image, energy }
+        unimplemented!()
     }
 
     fn resize_horizontal(&mut self, distance: isize) {
