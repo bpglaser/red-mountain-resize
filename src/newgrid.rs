@@ -1,5 +1,7 @@
 use image::{GenericImage, Pixel};
 
+use math::wrap_to_bounds;
+
 struct PixelEnergyPoint<P: Pixel> {
     pixel: P,
     energy: usize,
@@ -47,13 +49,20 @@ impl<P: Pixel> EnergyGrid<P> {
     }
 
     fn get(&self, x: isize, y: isize) -> &PixelEnergyPoint<P> {
-        unimplemented!()
-        // &self.points[y][x]
+        let (x, y) = self.get_bounded_coords(x, y);
+        &self.points[y][x]
     }
 
     fn get_mut(&mut self, x: isize, y: isize) -> &mut PixelEnergyPoint<P> {
-        unimplemented!()
-        // &mut self.points[y][x]
+        let (x, y) = self.get_bounded_coords(x, y);
+        &mut self.points[y][x]
+    }
+
+    fn get_bounded_coords(&self, x: isize, y: isize) -> (usize, usize) {
+        let x = wrap_to_bounds(x, 0, self.width() as isize);
+        let y = wrap_to_bounds(y, 0, self.height() as isize);
+        assert!(x >= 0 && y >= 0);
+        (x as usize, y as usize)
     }
 
     fn recalculate_all(&mut self) {
