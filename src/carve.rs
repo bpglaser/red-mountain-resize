@@ -1,17 +1,11 @@
 use image;
-use image::{DynamicImage, Rgba};
+use image::{DynamicImage, GenericImage, Rgba};
 
-use ArgConfig;
 use BoxResult;
+use Config;
 use Grid;
 
-pub fn run(config: ArgConfig) -> BoxResult<()> {
-    let image = image::open(&config.file_path)?;
-    let mut carver = Carver::new(image);
-    Ok(())
-}
-
-type Pixel = Rgba<u8>;
+pub type Pixel = Rgba<u8>;
 
 struct PixelEnergyPoint {
     pixel: Pixel,
@@ -26,6 +20,22 @@ struct Carver {
 
 impl Carver {
     fn new(image: DynamicImage) -> Self {
-        unimplemented!()
+        let peps = get_pep_grid(&image);
+        let grid = Grid::new(peps);
+        Self { image, grid }
     }
+}
+
+fn get_pep_grid(image: &DynamicImage) -> Vec<Vec<PixelEnergyPoint>> {
+    let (width, height) = image.dimensions();
+    let mut columns = vec![];
+    for y in 0..height {
+        let mut row = vec![];
+        for x in 0..width {
+            let pixel = image.get_pixel(x, y);
+            let pep = PixelEnergyPoint { pixel, energy: 0 };
+            row.push(pep);
+        }
+    }
+    columns
 }

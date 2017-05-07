@@ -9,8 +9,7 @@ mod grid;
 pub mod math;
 mod point;
 
-pub use carve::run;
-pub use config::ArgConfig;
+pub use config::Config;
 pub use config::parse_args;
 pub use grid::Grid;
 
