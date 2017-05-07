@@ -29,12 +29,20 @@ impl<T> Grid<T> {
 
     pub fn get(&self, x: isize, y: isize) -> &T {
         let (x, y) = self.get_bounded_coords(x, y);
-        &self.points[y][x]
+        if !self.rotated {
+            &self.points[y][x]
+        } else {
+            &self.points[x][y]
+        }
     }
 
     pub fn get_mut(&mut self, x: isize, y: isize) -> &mut T {
         let (x, y) = self.get_bounded_coords(x, y);
-        &mut self.points[y][x]
+        if !self.rotated {
+            &mut self.points[y][x]
+        } else {
+            &mut self.points[x][y]
+        }
     }
 
     pub fn rotate(&mut self) {

@@ -1,12 +1,9 @@
-use std::path::Path;
-
 use image;
-use image::{DynamicImage, GenericImage, Rgba};
+use image::{DynamicImage, Rgba};
 
 use ArgConfig;
 use BoxResult;
 use Grid;
-use point::{Point, PointPath};
 
 pub fn run(config: ArgConfig) -> BoxResult<()> {
     let image = image::open(&config.file_path)?;
