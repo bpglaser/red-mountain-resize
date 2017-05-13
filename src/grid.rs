@@ -37,6 +37,14 @@ impl<T> Grid<T> {
         }
     }
 
+    pub fn get_adjacent(&self, x: isize, y: isize) -> (&T, &T, &T, &T) {
+        let left = self.get(x - 1, y);
+        let right = self.get(x + 1, y);
+        let up = self.get(x, y - 1);
+        let down = self.get(x, y + 1);
+        (left, right, up, down)
+    }
+
     pub fn get_mut(&mut self, x: isize, y: isize) -> &mut T {
         let (x, y) = self.get_bounded_coords(x, y);
         if !self.rotated {

@@ -1,12 +1,11 @@
-use image::{DynamicImage, GenericImage, Rgba};
+use image::{DynamicImage, GenericImage, Pixel, Rgba};
+use num_traits::ToPrimitive;
 
 use config::Orientation;
 use grid::Grid;
 
-pub type Pixel = Rgba<u8>;
-
 struct PixelEnergyPoint {
-    pixel: Pixel,
+    pixel: Rgba<u8>,
     energy: usize,
     // todo inherited energy
 }
@@ -67,4 +66,31 @@ fn get_pep_grid(image: &DynamicImage) -> Vec<Vec<PixelEnergyPoint>> {
         columns.push(row);
     }
     columns
+}
+
+fn calculate_pixel_energy(grid: &Grid<PixelEnergyPoint>, x: u32, y: u32) -> usize {
+    let (left, right, up, down) = grid.get_adjacent(x as isize, y as isize);
+    let horizontal_square_gradient = square_gradient(left, right);
+    let vertical_square_gradient = square_gradient(up, down);
+    horizontal_square_gradient + vertical_square_gradient
+}
+
+fn square_gradient(pep1: &PixelEnergyPoint, pep2: &PixelEnergyPoint) -> usize {
+    let pixel1 = pep1.pixel;
+    let pixel2 = pep2.pixel;
+
+    let pixel1_channels = pixel1.channels();
+    let pixel2_channels = pixel2.channels();
+
+    let mut sum = 0;
+    for i in 0..pixel1_channels.len() {
+        let a = pixel1_channels[i]
+            .to_isize()
+            .expect("Unable to convert value");
+        let b = pixel2_channels[i]
+            .to_isize()
+            .expect("Unable to convert value");
+        sum += (a - b).abs().pow(2); // Squared abs difference
+    }
+    sum as usize
 }

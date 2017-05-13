@@ -61,6 +61,17 @@ fn grid_coord_iter_test() {
     assert_eq!((2, 1, &5), iter.next().unwrap());
 }
 
+#[test]
+fn grid_get_adjacent_test() {
+    let grid = make_test_grid();
+    let (left, right, up, down) = grid.get_adjacent(0, 0);
+
+    assert_eq!(&2, left);
+    assert_eq!(&1, right);
+    assert_eq!(&3, up);
+    assert_eq!(&3, down);
+}
+
 // Rotated test grid visualized:
 //  -------
 // | 0 | 3 |
