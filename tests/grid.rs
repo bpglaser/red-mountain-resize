@@ -45,6 +45,22 @@ fn grid_get_mut_test() {
     assert_eq!(&mut 5, grid.get_mut(2, 1));
 }
 
+#[test]
+fn grid_coord_iter_test() {
+    let grid = make_test_grid();
+    let mut iter = grid.coord_iter();
+
+    // First row
+    assert_eq!((0, 0, &0), iter.next().unwrap());
+    assert_eq!((1, 0, &1), iter.next().unwrap());
+    assert_eq!((2, 0, &2), iter.next().unwrap());
+
+    // Second row
+    assert_eq!((0, 1, &3), iter.next().unwrap());
+    assert_eq!((1, 1, &4), iter.next().unwrap());
+    assert_eq!((2, 1, &5), iter.next().unwrap());
+}
+
 // Rotated test grid visualized:
 //  -------
 // | 0 | 3 |
@@ -97,6 +113,25 @@ fn grid_rotation_get_mut_test() {
     // Third row
     assert_eq!(&mut 2, grid.get_mut(0, 2));
     assert_eq!(&mut 5, grid.get_mut(1, 2));
+}
+
+#[test]
+fn grid_rotation_coord_iter_test() {
+    let mut grid = make_test_grid();
+    grid.rotate();
+    let mut iter = grid.coord_iter();
+
+    // First row
+    assert_eq!((0, 0, &0), iter.next().unwrap());
+    assert_eq!((1, 0, &3), iter.next().unwrap());
+
+    // Second row
+    assert_eq!((0, 1, &1), iter.next().unwrap());
+    assert_eq!((1, 1, &4), iter.next().unwrap());
+
+    // Third row
+    assert_eq!((0, 2, &2), iter.next().unwrap());
+    assert_eq!((1, 2, &5), iter.next().unwrap());
 }
 
 fn make_test_grid() -> Grid<isize> {
