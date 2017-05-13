@@ -15,10 +15,17 @@ pub fn parse_args() -> BoxResult<Config> {
     Config::try_from(matches)
 }
 
+#[derive(Clone, Copy, Debug)]
+pub enum Orientation {
+    Horizontal,
+    Vertical,
+}
+
 #[derive(Debug)]
 pub struct Config {
     pub file_path: PathBuf,
-    pub direction: Direction,
+    pub distance: isize,
+    pub orientation: Orientation,
 }
 
 impl Config {
@@ -27,16 +34,12 @@ impl Config {
             .value_of("file_path")
             .ok_or("No file path given.")?
             .into();
-        let direction = Direction::Horizontal(150); // todo implement
+        let distance = 10; // todo implement
+        let orientation = Orientation::Horizontal; // todo implement
         Ok(Self {
                file_path,
-               direction,
+               distance,
+               orientation,
            })
     }
-}
-
-#[derive(Debug)]
-pub enum Direction {
-    Horizontal(usize),
-    Vertical(usize),
 }

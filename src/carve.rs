@@ -1,9 +1,7 @@
-use image;
 use image::{DynamicImage, GenericImage, Rgba};
 
-use BoxResult;
-use Config;
-use Grid;
+use config::Orientation;
+use grid::Grid;
 
 pub type Pixel = Rgba<u8>;
 
@@ -13,16 +11,31 @@ struct PixelEnergyPoint {
     // todo inherited energy
 }
 
-struct Carver {
-    image: DynamicImage,
+pub struct Carver {
+    image: DynamicImage, // todo delete? might not be needed
     grid: Grid<PixelEnergyPoint>,
 }
 
 impl Carver {
-    fn new(image: DynamicImage) -> Self {
+    pub fn new(image: DynamicImage) -> Self {
         let peps = get_pep_grid(&image);
         let grid = Grid::new(peps);
         Self { image, grid }
+    }
+
+    pub fn resize(&mut self, distance: isize, orientation: Orientation) -> DynamicImage {
+        match orientation {
+            Orientation::Horizontal => {}
+            Orientation::Vertical => self.grid.rotate(),
+        }
+        for _ in 0..distance {
+            self.resize_once()
+        }
+        unimplemented!()
+    }
+
+    fn resize_once(&mut self) {
+        unimplemented!()
     }
 }
 
@@ -36,6 +49,7 @@ fn get_pep_grid(image: &DynamicImage) -> Vec<Vec<PixelEnergyPoint>> {
             let pep = PixelEnergyPoint { pixel, energy: 0 };
             row.push(pep);
         }
+        columns.push(row);
     }
     columns
 }

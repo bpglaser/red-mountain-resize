@@ -1,6 +1,6 @@
 extern crate seam_carving_resize;
 
-use seam_carving_resize::Grid;
+use seam_carving_resize::grid::Grid;
 
 // Test grid visualized:
 //  -----------
