@@ -34,12 +34,45 @@ impl Carver {
     }
 
     fn resize_distance(&mut self, distance: isize) {
+        let shrink_image = distance < 0;
+        let distance = distance as usize;
+
         for _ in 0..distance {
-            self.resize_once()
+            self.calculate_energy();
+            let path = self.find_path();
+            if shrink_image {
+                self.remove_path(path);
+            } else {
+                self.add_path(path);
+            }
         }
     }
 
-    fn resize_once(&mut self) {
+    fn calculate_energy(&mut self) {
+        for x in 0..self.grid.width() {
+            // Calculate energy for first row
+            let energy = calculate_pixel_energy(&self.grid, x, 0);
+            let mut pixel = self.grid.get_mut(x, 0);
+            pixel.energy = energy;
+        }
+
+        for y in 1..self.grid.height() {
+            // Calculate energy for remaining rows
+            for x in 0..self.grid.width() {
+                unimplemented!()
+            }
+        }
+    }
+
+    fn find_path(&self) -> Vec<(isize, isize)> {
+        unimplemented!()
+    }
+
+    fn add_path(&mut self, points: Vec<(isize, isize)>) {
+        unimplemented!()
+    }
+
+    fn remove_path(&mut self, points: Vec<(isize, isize)>) {
         unimplemented!()
     }
 
@@ -68,8 +101,8 @@ fn get_pep_grid(image: &DynamicImage) -> Vec<Vec<PixelEnergyPoint>> {
     columns
 }
 
-fn calculate_pixel_energy(grid: &Grid<PixelEnergyPoint>, x: u32, y: u32) -> usize {
-    let (left, right, up, down) = grid.get_adjacent(x as isize, y as isize);
+fn calculate_pixel_energy(grid: &Grid<PixelEnergyPoint>, x: usize, y: usize) -> usize {
+    let (left, right, up, down) = grid.get_adjacent(x, y);
     let horizontal_square_gradient = square_gradient(left, right);
     let vertical_square_gradient = square_gradient(up, down);
     horizontal_square_gradient + vertical_square_gradient

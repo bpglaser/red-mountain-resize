@@ -1,5 +1,3 @@
-use math::wrap_to_bounds;
-
 #[derive(Debug)]
 pub struct Grid<T> {
     points: Vec<Vec<T>>,
@@ -28,8 +26,7 @@ impl<T> Grid<T> {
         }
     }
 
-    pub fn get(&self, x: isize, y: isize) -> &T {
-        let (x, y) = self.get_bounded_coords(x, y);
+    pub fn get(&self, x: usize, y: usize) -> &T {
         if !self.rotated {
             &self.points[y][x]
         } else {
@@ -37,16 +34,35 @@ impl<T> Grid<T> {
         }
     }
 
-    pub fn get_adjacent(&self, x: isize, y: isize) -> (&T, &T, &T, &T) {
-        let left = self.get(x - 1, y);
-        let right = self.get(x + 1, y);
-        let up = self.get(x, y - 1);
-        let down = self.get(x, y + 1);
+    pub fn get_adjacent(&self, x: usize, y: usize) -> (&T, &T, &T, &T) {
+        let left = if x == 0 {
+            self.get(self.width() - 1, y)
+        } else {
+            self.get(x - 1, y)
+        };
+
+        let right = if x == self.width() - 1 {
+            self.get(0, y)
+        } else {
+            self.get(x + 1, y)
+        };
+
+        let up = if y == 0 {
+            self.get(x, self.height() - 1)
+        } else {
+            self.get(x, y - 1)
+        };
+
+        let down = if y == self.height() - 1 {
+            self.get(x, 0)
+        } else {
+            self.get(x, y + 1)
+        };
+
         (left, right, up, down)
     }
 
-    pub fn get_mut(&mut self, x: isize, y: isize) -> &mut T {
-        let (x, y) = self.get_bounded_coords(x, y);
+    pub fn get_mut(&mut self, x: usize, y: usize) -> &mut T {
         if !self.rotated {
             &mut self.points[y][x]
         } else {
@@ -65,13 +81,6 @@ impl<T> Grid<T> {
             grid: &self,
         }
     }
-
-    fn get_bounded_coords(&self, x: isize, y: isize) -> (usize, usize) {
-        let x = wrap_to_bounds(x, 0, self.width() as isize);
-        let y = wrap_to_bounds(y, 0, self.height() as isize);
-        assert!(x >= 0 && y >= 0);
-        (x as usize, y as usize)
-    }
 }
 
 #[derive(Debug)]
@@ -86,7 +95,7 @@ impl<'a, T> Iterator for PointIter<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         let x = self.x;
         let y = self.y;
-        let val = self.grid.get(x as isize, y as isize);
+        let val = self.grid.get(x, y);
 
         if self.y >= self.grid.height() {
             return None;
