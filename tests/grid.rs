@@ -90,6 +90,21 @@ fn grid_get_adjacent_test() {
     assert_eq!(&2, down);
 }
 
+#[test]
+fn grid_get_parents_test() {
+    let grid = make_test_grid();
+
+    // First row
+    assert!(grid.get_parents(0, 0).is_empty());
+    assert!(grid.get_parents(1, 0).is_empty());
+    assert!(grid.get_parents(2, 0).is_empty());
+
+    // Second row
+    assert_eq!(vec![&0, &1], grid.get_parents(0, 1));
+    assert_eq!(vec![&0, &1, &2], grid.get_parents(1, 1));
+    assert_eq!(vec![&1, &2], grid.get_parents(2, 1));
+}
+
 // Rotated test grid visualized:
 //  -------
 // | 0 | 3 |

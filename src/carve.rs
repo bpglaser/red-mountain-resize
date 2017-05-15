@@ -7,7 +7,7 @@ use grid::Grid;
 struct PixelEnergyPoint {
     pixel: Rgba<u8>,
     energy: usize,
-    // todo inherited energy
+    path_cost: usize,
 }
 
 pub struct Carver {
@@ -49,19 +49,30 @@ impl Carver {
     }
 
     fn calculate_energy(&mut self) {
-        for x in 0..self.grid.width() {
-            // Calculate energy for first row
-            let energy = calculate_pixel_energy(&self.grid, x, 0);
-            let mut pixel = self.grid.get_mut(x, 0);
-            pixel.energy = energy;
-        }
-
-        for y in 1..self.grid.height() {
-            // Calculate energy for remaining rows
+        for y in 0..self.grid.height() {
             for x in 0..self.grid.width() {
-                unimplemented!()
+                self.calculate_pixel_energy(x, y);
+                self.calculate_path_cost(x, y);
             }
         }
+    }
+
+    fn calculate_pixel_energy(&mut self, x: usize, y: usize) {
+        let energy = {
+            let (left, right, up, down) = self.grid.get_adjacent(x, y);
+            let horizontal_square_gradient = square_gradient(left, right);
+            let vertical_square_gradient = square_gradient(up, down);
+            horizontal_square_gradient + vertical_square_gradient
+        };
+        self.grid.get_mut(x, y).energy = energy;
+    }
+
+    fn calculate_path_cost(&mut self, x: usize, y: usize) {
+        let min_parent_energy = {
+            let parents = self.grid.get_parents(x, y);
+            parents.iter().map(|pep| pep.energy).min().unwrap_or(0)
+        };
+        self.grid.get_mut(x, y).path_cost = min_parent_energy;
     }
 
     fn find_path(&self) -> Vec<(isize, isize)> {
@@ -93,19 +104,16 @@ fn get_pep_grid(image: &DynamicImage) -> Vec<Vec<PixelEnergyPoint>> {
         let mut row = vec![];
         for x in 0..width {
             let pixel = image.get_pixel(x, y);
-            let pep = PixelEnergyPoint { pixel, energy: 0 };
+            let pep = PixelEnergyPoint {
+                pixel,
+                energy: 0,
+                path_cost: 0,
+            };
             row.push(pep);
         }
         columns.push(row);
     }
     columns
-}
-
-fn calculate_pixel_energy(grid: &Grid<PixelEnergyPoint>, x: usize, y: usize) -> usize {
-    let (left, right, up, down) = grid.get_adjacent(x, y);
-    let horizontal_square_gradient = square_gradient(left, right);
-    let vertical_square_gradient = square_gradient(up, down);
-    horizontal_square_gradient + vertical_square_gradient
 }
 
 fn square_gradient(pep1: &PixelEnergyPoint, pep2: &PixelEnergyPoint) -> usize {
