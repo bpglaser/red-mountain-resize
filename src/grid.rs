@@ -80,6 +80,14 @@ impl<T> Grid<T> {
         parents
     }
 
+    pub fn get_row(&self, y: usize) -> Vec<&T> {
+        let mut row = vec![];
+        for x in 0..self.width() {
+            row.push(self.get(x, y));
+        }
+        row
+    }
+
     pub fn get_mut(&mut self, x: usize, y: usize) -> &mut T {
         if !self.rotated {
             &mut self.points[y][x]

@@ -75,15 +75,26 @@ impl Carver {
         self.grid.get_mut(x, y).path_cost = min_parent_energy;
     }
 
-    fn find_path(&self) -> Vec<(isize, isize)> {
+    fn find_path(&self) -> Vec<(usize, usize)> {
         unimplemented!()
     }
 
-    fn add_path(&mut self, points: Vec<(isize, isize)>) {
+    fn get_path_start(&self) -> (usize, usize) {
+        let y = self.grid.height() - 1;
+        let (x, _) = self.grid
+            .get_row(y)
+            .iter()
+            .enumerate()
+            .min_by_key(|&(_, pep)| pep.path_cost)
+            .expect("Unable to find start");
+        (x, y)
+    }
+
+    fn add_path(&mut self, points: Vec<(usize, usize)>) {
         unimplemented!()
     }
 
-    fn remove_path(&mut self, points: Vec<(isize, isize)>) {
+    fn remove_path(&mut self, points: Vec<(usize, usize)>) {
         unimplemented!()
     }
 

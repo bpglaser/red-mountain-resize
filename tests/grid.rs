@@ -105,6 +105,17 @@ fn grid_get_parents_test() {
     assert_eq!(vec![&1, &2], grid.get_parents(2, 1));
 }
 
+#[test]
+fn grid_get_row_test() {
+    let grid = make_test_grid();
+
+    // First row
+    assert_eq!(vec![&0, &1, &2], grid.get_row(0));
+
+    // Second row
+    assert_eq!(vec![&3, &4, &5], grid.get_row(1));
+}
+
 // Rotated test grid visualized:
 //  -------
 // | 0 | 3 |
