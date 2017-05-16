@@ -62,18 +62,18 @@ impl<T> Grid<T> {
         (left, right, up, down)
     }
 
-    pub fn get_parents(&self, x: usize, y: usize) -> Vec<&T> {
+    pub fn get_parents(&self, x: usize, y: usize) -> Vec<(usize, usize, &T)> {
         let mut parents = vec![];
 
         if y > 0 {
             if x > 0 {
-                parents.push(self.get(x - 1, y - 1));
+                parents.push((x - 1, y - 1, self.get(x - 1, y - 1)));
             }
 
-            parents.push(self.get(x, y - 1));
+            parents.push((x, y - 1, self.get(x, y - 1)));
 
             if x < self.width() - 1 {
-                parents.push(self.get(x + 1, y - 1));
+                parents.push((x + 1, y - 1, self.get(x + 1, y - 1)));
             }
         }
 

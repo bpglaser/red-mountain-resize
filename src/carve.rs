@@ -68,26 +68,47 @@ impl Carver {
     }
 
     fn calculate_path_cost(&mut self, x: usize, y: usize) {
-        let min_parent_energy = {
-            let parents = self.grid.get_parents(x, y);
-            parents.iter().map(|pep| pep.energy).min().unwrap_or(0)
-        };
-        self.grid.get_mut(x, y).path_cost = min_parent_energy;
+        let min_parent_path_cost = self.get_min_parent_path_cost(x, y).unwrap_or(0);
+        let energy = self.grid.get(x, y).energy;
+        self.grid.get_mut(x, y).path_cost = min_parent_path_cost + energy;
+    }
+
+    fn get_min_parent_path_cost(&self, x: usize, y: usize) -> Option<usize> {
+        self.grid
+            .get_parents(x, y)
+            .iter()
+            .map(|&(_, _, pep)| pep.path_cost)
+            .min()
     }
 
     fn find_path(&self) -> Vec<(usize, usize)> {
-        unimplemented!()
+        let mut path = vec![self.get_path_start()];
+        loop {
+            let &(x, y) = path.last().unwrap();
+            match self.get_parent_with_min_path_cost(x, y) {
+                None => return path,
+                Some(parent) => path.push(parent),
+            }
+        }
     }
 
     fn get_path_start(&self) -> (usize, usize) {
         let y = self.grid.height() - 1;
         let (x, _) = self.grid
             .get_row(y)
-            .iter()
+            .into_iter()
             .enumerate()
             .min_by_key(|&(_, pep)| pep.path_cost)
-            .expect("Unable to find start");
+            .expect("Bottom row should never be empty");
         (x, y)
+    }
+
+    fn get_parent_with_min_path_cost(&self, x: usize, y: usize) -> Option<(usize, usize)> {
+        self.grid
+            .get_parents(x, y)
+            .into_iter()
+            .min_by_key(|&(_, _, pep)| pep.path_cost)
+            .map(|(x, y, _)| (x, y))
     }
 
     fn add_path(&mut self, points: Vec<(usize, usize)>) {

@@ -100,9 +100,10 @@ fn grid_get_parents_test() {
     assert!(grid.get_parents(2, 0).is_empty());
 
     // Second row
-    assert_eq!(vec![&0, &1], grid.get_parents(0, 1));
-    assert_eq!(vec![&0, &1, &2], grid.get_parents(1, 1));
-    assert_eq!(vec![&1, &2], grid.get_parents(2, 1));
+    assert_eq!(vec![(0, 0, &0), (1, 0, &1)], grid.get_parents(0, 1));
+    assert_eq!(vec![(0, 0, &0), (1, 0, &1), (2, 0, &2)],
+               grid.get_parents(1, 1));
+    assert_eq!(vec![(1, 0, &1), (2, 0, &2)], grid.get_parents(2, 1));
 }
 
 #[test]
