@@ -119,13 +119,13 @@ pub struct PointIter<'a, T: 'a> {
 impl<'a, T> Iterator for PointIter<'a, T> {
     type Item = (usize, usize, &'a T);
     fn next(&mut self) -> Option<Self::Item> {
-        let x = self.x;
-        let y = self.y;
-        let val = self.grid.get(x, y);
-
         if self.y >= self.grid.height() {
             return None;
         }
+
+        let x = self.x;
+        let y = self.y;
+        let val = self.grid.get(x, y);
 
         self.x += 1;
         if self.x >= self.grid.width() {
