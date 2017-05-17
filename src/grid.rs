@@ -1,3 +1,5 @@
+use std::ptr::swap;
+
 #[derive(Debug)]
 pub struct Grid<T> {
     points: Vec<Vec<T>>,
@@ -106,6 +108,20 @@ impl<T> Grid<T> {
             y: 0,
             grid: &self,
         }
+    }
+
+    pub fn shift_row_from_point(&mut self, x: usize, y: usize) {
+        for x in x..self.width() - 1 {
+            unsafe {
+                let left: *mut T = self.get_mut(x, y);
+                let right: *mut T = self.get_mut(x + 1, y);
+                swap(left, right);
+            }
+        }
+    }
+
+    pub fn remove_last_column(&mut self) {
+        unimplemented!()
     }
 }
 

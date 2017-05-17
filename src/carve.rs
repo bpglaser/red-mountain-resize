@@ -116,7 +116,10 @@ impl Carver {
     }
 
     fn remove_path(&mut self, points: Vec<(usize, usize)>) {
-        unimplemented!()
+        for (x, y) in points {
+            self.grid.shift_row_from_point(x, y);
+        }
+        self.grid.remove_last_column();
     }
 
     fn rebuild_image(&self) -> DynamicImage {
