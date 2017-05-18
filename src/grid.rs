@@ -121,7 +121,14 @@ impl<T> Grid<T> {
     }
 
     pub fn remove_last_column(&mut self) {
-        unimplemented!()
+        let expect_msg = "Attempted to remove column from empty grid";
+        if self.rotated {
+            self.points.pop().expect(expect_msg);
+        } else {
+            for mut row in self.points.iter_mut() {
+                row.pop().expect(expect_msg);
+            }
+        }
     }
 }
 

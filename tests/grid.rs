@@ -202,6 +202,27 @@ fn grid_shift_row_test() {
     assert_eq!(&8, grid.get(2, 2));
 }
 
+#[test]
+fn grid_remove_last_column_test() {
+    let mut grid = make_test_grid();
+
+    grid.remove_last_column();
+    assert_eq!(2, grid.width());
+    assert_eq!(3, grid.height());
+    assert_eq!(&0, grid.get(0, 0));
+    assert_eq!(&7, grid.get(1, 2));
+
+    grid.remove_last_column();
+    assert_eq!(1, grid.width());
+    assert_eq!(3, grid.height());
+    assert_eq!(&0, grid.get(0, 0));
+    assert_eq!(&6, grid.get(0, 2));
+
+    grid.remove_last_column();
+    assert_eq!(0, grid.width());
+    assert_eq!(0, grid.width());
+}
+
 // Rotated test grid visualized:
 //  -----------
 // | 0 | 3 | 6 |
@@ -310,6 +331,28 @@ fn grid_rotation_shift_row_test() {
     assert_eq!(&2, grid.get(0, 2));
     assert_eq!(&5, grid.get(1, 2));
     assert_eq!(&8, grid.get(2, 2));
+}
+
+#[test]
+fn grid_rotation_remove_last_column_test() {
+    let mut grid = make_test_grid();
+    grid.rotate();
+
+    grid.remove_last_column();
+    assert_eq!(2, grid.width());
+    assert_eq!(3, grid.height());
+    assert_eq!(&0, grid.get(0, 0));
+    assert_eq!(&5, grid.get(1, 2));
+
+    grid.remove_last_column();
+    assert_eq!(1, grid.width());
+    assert_eq!(3, grid.height());
+    assert_eq!(&0, grid.get(0, 0));
+    assert_eq!(&2, grid.get(0, 2));
+
+    grid.remove_last_column();
+    assert_eq!(0, grid.width());
+    assert_eq!(0, grid.width());
 }
 
 fn make_test_grid() -> Grid<isize> {
