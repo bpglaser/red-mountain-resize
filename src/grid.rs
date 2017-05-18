@@ -1,12 +1,10 @@
-use std::ptr::swap;
-
 #[derive(Debug)]
-pub struct Grid<T> {
+pub struct Grid<T: Copy> {
     points: Vec<Vec<T>>,
     rotated: bool,
 }
 
-impl<T> Grid<T> {
+impl<T: Copy> Grid<T> {
     pub fn new(points: Vec<Vec<T>>) -> Self {
         let rotated = false;
         Self { points, rotated }
@@ -110,13 +108,9 @@ impl<T> Grid<T> {
         }
     }
 
-    pub fn shift_row_from_point(&mut self, x: usize, y: usize) {
+    pub fn shift_row_left_from_point(&mut self, x: usize, y: usize) {
         for x in x..self.width() - 1 {
-            unsafe {
-                let left: *mut T = self.get_mut(x, y);
-                let right: *mut T = self.get_mut(x + 1, y);
-                swap(left, right);
-            }
+            *self.get_mut(x, y) = *self.get(x + 1, y);
         }
     }
 
@@ -133,13 +127,13 @@ impl<T> Grid<T> {
 }
 
 #[derive(Debug)]
-pub struct PointIter<'a, T: 'a> {
+pub struct PointIter<'a, T: 'a + Copy> {
     x: usize,
     y: usize,
     grid: &'a Grid<T>,
 }
 
-impl<'a, T> Iterator for PointIter<'a, T> {
+impl<'a, T: Copy> Iterator for PointIter<'a, T> {
     type Item = (usize, usize, &'a T);
     fn next(&mut self) -> Option<Self::Item> {
         if self.y >= self.grid.height() {

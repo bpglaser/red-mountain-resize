@@ -4,6 +4,7 @@ use num_traits::ToPrimitive;
 use config::Orientation;
 use grid::Grid;
 
+#[derive(Copy, Clone)]
 struct PixelEnergyPoint {
     pixel: Rgba<u8>,
     energy: usize,
@@ -117,7 +118,7 @@ impl Carver {
 
     fn remove_path(&mut self, points: Vec<(usize, usize)>) {
         for (x, y) in points {
-            self.grid.shift_row_from_point(x, y);
+            self.grid.shift_row_left_from_point(x, y);
         }
         self.grid.remove_last_column();
     }
