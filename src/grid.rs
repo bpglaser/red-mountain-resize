@@ -1,10 +1,9 @@
-#[derive(Debug)]
-pub struct Grid<T: Copy> {
+pub struct Grid<T: Clone> {
     points: Vec<Vec<T>>,
     rotated: bool,
 }
 
-impl<T: Copy> Grid<T> {
+impl<T: Clone> Grid<T> {
     pub fn new(points: Vec<Vec<T>>) -> Self {
         let rotated = false;
         Self { points, rotated }
@@ -110,8 +109,12 @@ impl<T: Copy> Grid<T> {
 
     pub fn shift_row_left_from_point(&mut self, x: usize, y: usize) {
         for x in x..self.width() - 1 {
-            *self.get_mut(x, y) = *self.get(x + 1, y);
+            *self.get_mut(x, y) = self.get(x + 1, y).clone();
         }
+    }
+
+    pub fn shift_row_right_from_point(&mut self, x: usize, y: usize) {
+        unimplemented!()
     }
 
     pub fn remove_last_column(&mut self) {
@@ -124,16 +127,19 @@ impl<T: Copy> Grid<T> {
             }
         }
     }
+
+    pub fn add_last_column(&mut self) {
+        unimplemented!()
+    }
 }
 
-#[derive(Debug)]
-pub struct PointIter<'a, T: 'a + Copy> {
+pub struct PointIter<'a, T: 'a + Clone> {
     x: usize,
     y: usize,
     grid: &'a Grid<T>,
 }
 
-impl<'a, T: Copy> Iterator for PointIter<'a, T> {
+impl<'a, T: Clone> Iterator for PointIter<'a, T> {
     type Item = (usize, usize, &'a T);
     fn next(&mut self) -> Option<Self::Item> {
         if self.y >= self.grid.height() {

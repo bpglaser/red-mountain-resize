@@ -15,13 +15,12 @@ pub fn parse_args() -> BoxResult<Config> {
     Config::try_from(matches)
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub enum Orientation {
     Horizontal,
     Vertical,
 }
 
-#[derive(Debug)]
 pub struct Config {
     pub file_path: PathBuf,
     pub distance: isize,
