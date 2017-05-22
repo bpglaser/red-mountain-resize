@@ -41,7 +41,7 @@ impl Config {
             .ok_or("No save path given.")?
             .into();
 
-        let distance = 100; // todo implement
+        let distance = -100; // todo implement
         let orientation = Orientation::Horizontal; // todo implement
         Ok(Self {
                file_path,

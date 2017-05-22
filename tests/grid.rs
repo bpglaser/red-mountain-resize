@@ -34,7 +34,6 @@ fn grid_get_test() {
     assert_eq!(&6, grid.get(0, 2));
     assert_eq!(&7, grid.get(1, 2));
     assert_eq!(&8, grid.get(2, 2));
-
 }
 
 #[test]
@@ -55,7 +54,6 @@ fn grid_get_mut_test() {
     assert_eq!(&mut 6, grid.get_mut(0, 2));
     assert_eq!(&mut 7, grid.get_mut(1, 2));
     assert_eq!(&mut 8, grid.get_mut(2, 2));
-
 }
 
 #[test]
@@ -455,8 +453,6 @@ fn grid_rotation_add_last_column_test() {
     assert_eq!(&5, grid.get(1, 2));
     assert_eq!(&8, grid.get(2, 2));
     assert_eq!(&8, grid.get(3, 2));
-
-
 }
 
 fn make_test_grid() -> Grid<isize> {

@@ -36,7 +36,7 @@ impl Carver {
 
     fn resize_distance(&mut self, distance: isize) {
         let shrink_image = distance < 0;
-        let distance = distance as usize;
+        let distance = distance.wrapping_abs() as usize;
 
         for _ in 0..distance {
             self.calculate_energy();
