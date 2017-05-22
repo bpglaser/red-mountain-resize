@@ -6,6 +6,5 @@ extern crate num_traits;
 pub mod carve;
 pub mod config;
 pub mod grid;
-pub mod point;
 
 pub type BoxResult<T> = Result<T, Box<std::error::Error>>;
