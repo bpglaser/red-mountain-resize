@@ -114,7 +114,7 @@ impl<T: Clone> Grid<T> {
     }
 
     pub fn shift_row_right_from_point(&mut self, x: usize, y: usize) {
-        for x in (self.width() - 1)..(x + 1) {
+        for x in (x + 1..self.width()).rev() {
             *self.get_mut(x, y) = self.get(x - 1, y).clone();
         }
     }

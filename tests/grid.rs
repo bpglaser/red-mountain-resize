@@ -203,6 +203,29 @@ fn grid_shift_row_left_from_point_test() {
 }
 
 #[test]
+fn grid_shift_row_right_from_point_test() {
+    let mut grid = make_test_grid();
+
+    // First row
+    grid.shift_row_right_from_point(0, 0);
+    assert_eq!(&0, grid.get(0, 0));
+    assert_eq!(&0, grid.get(1, 0));
+    assert_eq!(&1, grid.get(2, 0));
+
+    // Second row
+    grid.shift_row_right_from_point(1, 1);
+    assert_eq!(&3, grid.get(0, 1));
+    assert_eq!(&4, grid.get(1, 1));
+    assert_eq!(&4, grid.get(2, 1));
+
+    // Third row
+    grid.shift_row_right_from_point(2, 2);
+    assert_eq!(&6, grid.get(0, 2));
+    assert_eq!(&7, grid.get(1, 2));
+    assert_eq!(&8, grid.get(2, 2));
+}
+
+#[test]
 fn grid_remove_last_column_test() {
     let mut grid = make_test_grid();
 
@@ -328,6 +351,30 @@ fn grid_rotation_shift_row_left_from_point_test() {
 
     // Third row
     grid.shift_row_left_from_point(2, 2);
+    assert_eq!(&2, grid.get(0, 2));
+    assert_eq!(&5, grid.get(1, 2));
+    assert_eq!(&8, grid.get(2, 2));
+}
+
+#[test]
+fn grid_rotation_shift_row_right_from_point_test() {
+    let mut grid = make_test_grid();
+    grid.rotate();
+
+    // First row
+    grid.shift_row_right_from_point(0, 0);
+    assert_eq!(&0, grid.get(0, 0));
+    assert_eq!(&0, grid.get(1, 0));
+    assert_eq!(&3, grid.get(2, 0));
+
+    // Second row
+    grid.shift_row_right_from_point(1, 1);
+    assert_eq!(&1, grid.get(0, 1));
+    assert_eq!(&4, grid.get(1, 1));
+    assert_eq!(&4, grid.get(2, 1));
+
+    // Third row
+    grid.shift_row_right_from_point(2, 2);
     assert_eq!(&2, grid.get(0, 2));
     assert_eq!(&5, grid.get(1, 2));
     assert_eq!(&8, grid.get(2, 2));
