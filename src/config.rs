@@ -9,7 +9,8 @@ pub fn parse_args() -> BoxResult<Config> {
         (version: "0.1.0")
         (author: "Brad Glaser <bpglaser@gmail.com")
         (about: "foobar")
-        (@arg file_path: <filename>)
+        (@arg file_path: <input_filename>)
+        (@arg save_path: <output_filename>)
     )
             .get_matches();
     Config::try_from(matches)
@@ -23,6 +24,7 @@ pub enum Orientation {
 
 pub struct Config {
     pub file_path: PathBuf,
+    pub save_path: PathBuf,
     pub distance: isize,
     pub orientation: Orientation,
 }
@@ -33,10 +35,17 @@ impl Config {
             .value_of("file_path")
             .ok_or("No file path given.")?
             .into();
-        let distance = 10; // todo implement
+
+        let save_path = matches
+            .value_of("save_path")
+            .ok_or("No save path given.")?
+            .into();
+
+        let distance = 100; // todo implement
         let orientation = Orientation::Horizontal; // todo implement
         Ok(Self {
                file_path,
+               save_path,
                distance,
                orientation,
            })

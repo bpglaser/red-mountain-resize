@@ -108,13 +108,15 @@ impl<T: Clone> Grid<T> {
     }
 
     pub fn shift_row_left_from_point(&mut self, x: usize, y: usize) {
-        for x in x..self.width() - 1 {
+        for x in x..(self.width() - 1) {
             *self.get_mut(x, y) = self.get(x + 1, y).clone();
         }
     }
 
     pub fn shift_row_right_from_point(&mut self, x: usize, y: usize) {
-        unimplemented!()
+        for x in (self.width() - 1)..(x + 1) {
+            *self.get_mut(x, y) = self.get(x - 1, y).clone();
+        }
     }
 
     pub fn remove_last_column(&mut self) {
@@ -129,7 +131,16 @@ impl<T: Clone> Grid<T> {
     }
 
     pub fn add_last_column(&mut self) {
-        unimplemented!()
+        let expect_msg = "Attempted to get last from empty grid";
+        if self.rotated {
+            let clone = self.points.last().expect(expect_msg).clone();
+            self.points.push(clone);
+        } else {
+            for mut row in self.points.iter_mut() {
+                let clone = row.last().expect(expect_msg).clone();
+                row.push(clone);
+            }
+        }
     }
 }
 
