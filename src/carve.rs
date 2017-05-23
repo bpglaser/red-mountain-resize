@@ -41,13 +41,42 @@ impl Carver {
     }
 
     fn resize_distance(&mut self, distance: usize, mode: Mode) {
+        match mode {
+            Mode::Grow => self.grow_distance(distance),
+            Mode::Shrink => self.shrink_distance(distance),
+        }
+    }
+
+    fn grow_distance(&mut self, distance: usize) {
+        self.calculate_energy();
+
+        let starts = self.get_multiple_path_starts(distance);
+        let mut points = vec![];
+        for (start_x, start_y) in starts {
+            for (x, y) in self.find_path(start_x, start_y) {
+                let pixel = self.average_pixel_from_neighbors(x, y);
+                points.push((x, y, pixel));
+            }
+        }
+
+        // Sort points by reversed x pos
+        points.sort_by(|a, b| b.0.cmp(&a.0));
+
+        for _ in 0..distance {
+            self.grid.add_last_column();
+        }
+
+        for (x, y, pixel) in points {
+            self.add_point(x, y, pixel);
+        }
+    }
+
+    fn shrink_distance(&mut self, distance: usize) {
         for _ in 0..distance {
             self.calculate_energy();
-            let path = self.find_path();
-            match mode {
-                Mode::Grow => self.add_path(path),
-                Mode::Shrink => self.remove_path(path),
-            }
+            let (start_x, start_y) = self.get_path_start();
+            let path = self.find_path(start_x, start_y);
+            self.remove_path(path);
         }
     }
 
@@ -84,8 +113,8 @@ impl Carver {
             .min()
     }
 
-    fn find_path(&self) -> Vec<(usize, usize)> {
-        let mut path = vec![self.get_path_start()];
+    fn find_path(&self, start_x: usize, start_y: usize) -> Vec<(usize, usize)> {
+        let mut path = vec![(start_x, start_y)];
         loop {
             let &(x, y) = path.last().unwrap();
             match self.get_parent_with_min_path_cost(x, y) {
@@ -106,6 +135,25 @@ impl Carver {
         (x, y)
     }
 
+    fn get_multiple_path_starts(&self, count: usize) -> Vec<(usize, usize)> {
+        let y = self.grid.height() - 1;
+
+        let mut points: Vec<_> = self.grid // TODO move me into grid.rs
+            .get_row(y)
+            .into_iter()
+            .enumerate()
+            .map(|(x, pep)| (x, y, pep))
+            .collect();
+
+        points.sort_by_key(|&(_, _, pep)| pep.path_cost);
+
+        points
+            .into_iter()
+            .map(|(x, y, _)| (x, y))
+            .take(count)
+            .collect()
+    }
+
     fn get_parent_with_min_path_cost(&self, x: usize, y: usize) -> Option<(usize, usize)> {
         self.grid
             .get_parents(x, y)
@@ -114,11 +162,22 @@ impl Carver {
             .map(|(x, y, _)| (x, y))
     }
 
-    fn add_path(&mut self, points: Vec<(usize, usize)>) {
-        self.grid.add_last_column();
-        for (x, y) in points {
-            self.grid.shift_row_right_from_point(x, y);
-        }
+    fn add_point(&mut self, x: usize, y: usize, pixel: Rgba<u8>) {
+        let pep = PixelEnergyPoint {
+            pixel,
+            energy: 0,
+            path_cost: 0,
+        };
+        self.grid.shift_row_right_from_point(x, y);
+        *self.grid.get_mut(x + 1, y) = pep;
+    }
+
+    fn average_pixel_from_neighbors(&self, x: usize, y: usize) -> Rgba<u8> {
+        let (left, right, _, _) = self.grid.get_adjacent(x, y);
+        let left = left.pixel;
+        let right = right.pixel;
+        let data = average_pixels(&left.data, &right.data);
+        Rgba { data }
     }
 
     fn remove_path(&mut self, points: Vec<(usize, usize)>) {
@@ -175,4 +234,11 @@ fn square_gradient(pep1: &PixelEnergyPoint, pep2: &PixelEnergyPoint) -> usize {
         sum += (a - b).abs().pow(2); // Squared abs difference
     }
     sum as usize
+}
+
+fn average_pixels(pixel1: &[u8; 4], pixel2: &[u8; 4]) -> [u8; 4] {
+    [((pixel1[0] as u16 + pixel2[0] as u16) / 2) as u8,
+     ((pixel1[1] as u16 + pixel2[1] as u16) / 2) as u8,
+     ((pixel1[2] as u16 + pixel2[2] as u16) / 2) as u8,
+     ((pixel1[3] as u16 + pixel2[3] as u16) / 2) as u8]
 }
