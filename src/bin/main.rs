@@ -17,7 +17,7 @@ fn main() {
 fn run(config: Config) -> BoxResult<()> {
     let image = image::open(config.file_path)?;
     let mut carver = Carver::new(image);
-    let scaled_image = carver.resize(config.distance, config.orientation);
+    let scaled_image = carver.resize(config.distance, config.orientation, config.mode);
     save_to_config_path(scaled_image, config.save_path)
 }
 

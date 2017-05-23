@@ -1,7 +1,7 @@
 use image::{DynamicImage, GenericImage, Pixel, Rgba};
 use num_traits::ToPrimitive;
 
-use config::Orientation;
+use config::{Mode, Orientation};
 use grid::Grid;
 
 #[derive(Clone)]
@@ -22,29 +22,29 @@ impl Carver {
         Self { grid }
     }
 
-    pub fn resize(&mut self, distance: isize, orientation: Orientation) -> DynamicImage {
+    pub fn resize(&mut self,
+                  distance: usize,
+                  orientation: Orientation,
+                  mode: Mode)
+                  -> DynamicImage {
         match orientation {
-            Orientation::Horizontal => self.resize_distance(distance),
+            Orientation::Horizontal => self.resize_distance(distance, mode),
             Orientation::Vertical => {
                 self.grid.rotate();
-                self.resize_distance(distance);
+                self.resize_distance(distance, mode);
                 self.grid.rotate();
             }
         }
         self.rebuild_image()
     }
 
-    fn resize_distance(&mut self, distance: isize) {
-        let shrink_image = distance < 0;
-        let distance = distance.wrapping_abs() as usize;
-
+    fn resize_distance(&mut self, distance: usize, mode: Mode) {
         for _ in 0..distance {
             self.calculate_energy();
             let path = self.find_path();
-            if shrink_image {
-                self.remove_path(path);
-            } else {
-                self.add_path(path);
+            match mode {
+                Mode::Grow => self.add_path(path),
+                Mode::Shrink => self.remove_path(path),
             }
         }
     }

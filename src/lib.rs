@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate clap;
 extern crate image;
 extern crate num_traits;
