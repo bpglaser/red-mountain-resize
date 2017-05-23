@@ -27,6 +27,7 @@ impl Carver {
                   orientation: Orientation,
                   mode: Mode)
                   -> DynamicImage {
+
         match orientation {
             Orientation::Horizontal => self.resize_distance(distance, mode),
             Orientation::Vertical => {
@@ -35,6 +36,7 @@ impl Carver {
                 self.grid.rotate();
             }
         }
+
         self.rebuild_image()
     }
 
