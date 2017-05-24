@@ -4,6 +4,8 @@ use num_traits::ToPrimitive;
 use config::{Mode, Orientation};
 use grid::Grid;
 
+const RED: Rgba<u8> = Rgba { data: [255, 0, 0, 255] };
+
 #[derive(Clone)]
 struct PixelEnergyPoint {
     pixel: Rgba<u8>,
@@ -11,15 +13,21 @@ struct PixelEnergyPoint {
     path_cost: usize,
 }
 
-pub struct Carver {
+pub struct Carver<'a> {
+    image: &'a DynamicImage,
     grid: Grid<PixelEnergyPoint>,
+    path_points: Vec<(usize, usize)>,
 }
 
-impl Carver {
-    pub fn new(image: DynamicImage) -> Self {
-        let peps = get_pep_grid(&image);
+impl<'a> Carver<'a> {
+    pub fn new(image: &'a DynamicImage) -> Self {
+        let peps = get_pep_grid(image);
         let grid = Grid::new(peps);
-        Self { grid }
+        Self {
+            image,
+            grid,
+            path_points: vec![],
+        }
     }
 
     pub fn resize(&mut self,
@@ -38,6 +46,14 @@ impl Carver {
         }
 
         self.rebuild_image()
+    }
+
+    pub fn get_path_image(&self) -> DynamicImage {
+        let mut path_image = self.image.clone();
+        for &(x, y) in &self.path_points {
+            path_image.put_pixel(x as u32, y as u32, RED);
+        }
+        path_image
     }
 
     fn resize_distance(&mut self, distance: usize, mode: Mode) {
@@ -182,6 +198,7 @@ impl Carver {
 
     fn remove_path(&mut self, points: Vec<(usize, usize)>) {
         for (x, y) in points {
+            self.path_points.push((x, y));
             self.grid.shift_row_left_from_point(x, y);
         }
         self.grid.remove_last_column();

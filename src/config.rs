@@ -29,6 +29,7 @@ pub fn parse_args() -> BoxResult<Config> {
                  .long("shrink")
                  .required_unless("grow")
                  .conflicts_with("grow"))
+        .arg(Arg::with_name("debug").long("debug"))
         .arg(Arg::with_name("file_path").required(true))
         .arg(Arg::with_name("save_path").required(true))
         .get_matches();
@@ -49,6 +50,7 @@ pub struct Config {
     pub distance: usize,
     pub orientation: Orientation,
     pub mode: Mode,
+    pub save_path_image: bool,
 }
 
 impl Config {
@@ -80,12 +82,15 @@ impl Config {
             Mode::Shrink
         };
 
+        let save_path_image = matches.is_present("debug");
+
         Ok(Self {
                file_path,
                save_path,
                distance,
                orientation,
                mode,
+               save_path_image,
            })
     }
 }
