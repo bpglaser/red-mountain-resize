@@ -5,7 +5,7 @@ use clap::{App, Arg, ArgMatches};
 use BoxResult;
 
 pub fn parse_args() -> BoxResult<Config> {
-    let matches = App::new("Seam Carving Resize")
+    let matches = App::new("Red Mountain Resize")
         .version("0.1.0")
         .author("Brad Glaser <bpglaser@gmail.com>")
         .arg(Arg::with_name("distance")

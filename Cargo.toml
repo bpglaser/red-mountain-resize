@@ -1,7 +1,10 @@
 [package]
-name = "seam-carving-resize"
+name = "rmr"
 version = "0.1.0"
 authors = ["bpglaser <bpglaser@gmail.com>"]
+
+[[bin]]
+name = "rmr"
 
 [dependencies]
 clap = "2.23.3"

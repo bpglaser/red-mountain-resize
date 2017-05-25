@@ -1,14 +1,14 @@
 extern crate image;
-extern crate seam_carving_resize;
+extern crate rmr;
 
 use std::fs::File;
 use std::path::Path;
 
 use image::{DynamicImage, ImageFormat};
 
-use seam_carving_resize::BoxResult;
-use seam_carving_resize::carve::Carver;
-use seam_carving_resize::config::{Config, parse_args};
+use rmr::BoxResult;
+use rmr::carve::Carver;
+use rmr::config::{Config, parse_args};
 
 fn main() {
     parse_args().and_then(run).unwrap()
