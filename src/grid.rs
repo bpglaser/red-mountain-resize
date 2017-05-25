@@ -87,6 +87,14 @@ impl<T: Clone> Grid<T> {
         row
     }
 
+    pub fn get_row_with_coords(&self, y: usize) -> Vec<(usize, usize, &T)> {
+        self.get_row(y)
+            .into_iter()
+            .enumerate()
+            .map(|(x, pep)| (x, y, pep))
+            .collect()
+    }
+
     pub fn get_mut(&mut self, x: usize, y: usize) -> &mut T {
         if !self.rotated {
             &mut self.points[y][x]

@@ -152,17 +152,8 @@ impl<'a> Carver<'a> {
     }
 
     fn get_multiple_path_starts(&self, count: usize) -> Vec<(usize, usize)> {
-        let y = self.grid.height() - 1;
-
-        let mut points: Vec<_> = self.grid // TODO move me into grid.rs
-            .get_row(y)
-            .into_iter()
-            .enumerate()
-            .map(|(x, pep)| (x, y, pep))
-            .collect();
-
+        let mut points = self.grid.get_row_with_coords(self.grid.height() - 1);
         points.sort_by_key(|&(_, _, pep)| pep.path_cost);
-
         points
             .into_iter()
             .map(|(x, y, _)| (x, y))

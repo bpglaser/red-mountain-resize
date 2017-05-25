@@ -178,6 +178,23 @@ fn grid_get_row_test() {
 }
 
 #[test]
+fn grid_get_row_with_coords_test() {
+    let grid = make_test_grid();
+
+    // First row
+    assert_eq!(vec![(0, 0, &0), (1, 0, &1), (2, 0, &2)],
+               grid.get_row_with_coords(0));
+
+    // Second row
+    assert_eq!(vec![(0, 1, &3), (1, 1, &4), (2, 1, &5)],
+               grid.get_row_with_coords(1));
+
+    // Third row
+    assert_eq!(vec![(0, 2, &6), (1, 2, &7), (2, 2, &8)],
+               grid.get_row_with_coords(2));
+}
+
+#[test]
 fn grid_shift_row_left_from_point_test() {
     let mut grid = make_test_grid();
 
