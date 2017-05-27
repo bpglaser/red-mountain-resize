@@ -29,7 +29,7 @@ pub fn parse_args() -> BoxResult<Config> {
                  .long("shrink")
                  .required_unless("grow")
                  .conflicts_with("grow"))
-        .arg(Arg::with_name("debug").long("debug"))
+        .arg(Arg::with_name("debug").long("debug").takes_value(true))
         .arg(Arg::with_name("file_path").required(true))
         .arg(Arg::with_name("save_path").required(true))
         .get_matches();
@@ -50,7 +50,7 @@ pub struct Config {
     pub distance: usize,
     pub orientation: Orientation,
     pub mode: Mode,
-    pub save_path_image: bool,
+    pub debug_image_path: Option<String>,
 }
 
 impl Config {
@@ -82,7 +82,7 @@ impl Config {
             Mode::Shrink
         };
 
-        let save_path_image = matches.is_present("debug");
+        let debug_image_path = matches.value_of("debug").map(|s| s.to_owned());
 
         Ok(Self {
                file_path,
@@ -90,7 +90,7 @@ impl Config {
                distance,
                orientation,
                mode,
-               save_path_image,
+               debug_image_path,
            })
     }
 }

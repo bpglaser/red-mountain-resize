@@ -4,7 +4,6 @@ use num_traits::ToPrimitive;
 use config::{Mode, Orientation};
 use grid::Grid;
 
-const RED: Rgba<u8> = Rgba { data: [255, 0, 0, 255] };
 
 #[derive(Clone)]
 struct PixelEnergyPoint {
@@ -13,20 +12,18 @@ struct PixelEnergyPoint {
     path_cost: usize,
 }
 
-pub struct Carver<'a> {
-    image: &'a DynamicImage,
+pub struct Carver {
     grid: Grid<PixelEnergyPoint>,
-    path_points: Vec<(usize, usize)>,
+    debug_points: Vec<(usize, usize)>,
 }
 
-impl<'a> Carver<'a> {
-    pub fn new(image: &'a DynamicImage) -> Self {
+impl Carver {
+    pub fn new(image: &DynamicImage) -> Self {
         let peps = get_pep_grid(image);
         let grid = Grid::new(peps);
         Self {
-            image,
             grid,
-            path_points: vec![],
+            debug_points: vec![],
         }
     }
 
@@ -48,12 +45,8 @@ impl<'a> Carver<'a> {
         self.rebuild_image()
     }
 
-    pub fn get_path_image(&self) -> DynamicImage {
-        let mut path_image = self.image.clone();
-        for &(x, y) in &self.path_points {
-            path_image.put_pixel(x as u32, y as u32, RED);
-        }
-        path_image
+    pub fn get_debug_points(&self) -> Vec<(usize, usize)> {
+        self.debug_points.clone()
     }
 
     fn resize_distance(&mut self, distance: usize, mode: Mode) {
@@ -66,24 +59,26 @@ impl<'a> Carver<'a> {
     fn grow_distance(&mut self, distance: usize) {
         self.calculate_energy();
 
-        let starts = self.get_multiple_path_starts(distance);
         let mut points = vec![];
-        for (start_x, start_y) in starts {
+        for (start_x, start_y) in self.get_multiple_path_starts(distance) {
             for (x, y) in self.find_path(start_x, start_y) {
-                let pixel = self.average_pixel_from_neighbors(x, y);
-                points.push((x, y, pixel));
+                points.push((x, y));
             }
         }
 
         // Sort points by reversed x pos
         points.sort_by(|a, b| b.0.cmp(&a.0));
 
+        // Expand the grid to hold new points
         for _ in 0..distance {
             self.grid.add_last_column();
         }
 
-        for (x, y, pixel) in points {
+        for (x, y) in points {
+            let left = self.grid.get(x, y).pixel;
+            let pixel = self.average_pixel_from_neighbors(x, y, left);
             self.add_point(x, y, pixel);
+            self.debug_points.push((x, y));
         }
     }
 
@@ -179,17 +174,15 @@ impl<'a> Carver<'a> {
         *self.grid.get_mut(x + 1, y) = pep;
     }
 
-    fn average_pixel_from_neighbors(&self, x: usize, y: usize) -> Rgba<u8> {
-        let (left, right, _, _) = self.grid.get_adjacent(x, y);
-        let left = left.pixel;
-        let right = right.pixel;
+    fn average_pixel_from_neighbors(&self, x: usize, y: usize, left: Rgba<u8>) -> Rgba<u8> {
+        let right = self.grid.get(x + 1, y).pixel;
         let data = average_pixels(&left.data, &right.data);
         Rgba { data }
     }
 
     fn remove_path(&mut self, points: Vec<(usize, usize)>) {
         for (x, y) in points {
-            self.path_points.push((x, y));
+            self.debug_points.push((x, y));
             self.grid.shift_row_left_from_point(x, y);
         }
         self.grid.remove_last_column();
@@ -249,4 +242,13 @@ fn average_pixels(pixel1: &[u8; 4], pixel2: &[u8; 4]) -> [u8; 4] {
      ((pixel1[1] as u16 + pixel2[1] as u16) / 2) as u8,
      ((pixel1[2] as u16 + pixel2[2] as u16) / 2) as u8,
      ((pixel1[3] as u16 + pixel2[3] as u16) / 2) as u8]
+}
+
+pub fn create_debug_image(image: &DynamicImage, points: &[(usize, usize)]) -> DynamicImage {
+    let red_pixel = Rgba { data: [255, 0, 0, 255] };
+    let mut image = image.clone();
+    for &(x, y) in points {
+        image.put_pixel(x as u32, y as u32, red_pixel);
+    }
+    image
 }

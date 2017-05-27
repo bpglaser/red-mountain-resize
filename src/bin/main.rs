@@ -7,7 +7,7 @@ use std::path::Path;
 use image::{DynamicImage, ImageFormat};
 
 use rmr::BoxResult;
-use rmr::carve::Carver;
+use rmr::carve::{Carver, create_debug_image};
 use rmr::config::{Config, parse_args};
 
 fn main() {
@@ -19,16 +19,16 @@ fn run(config: Config) -> BoxResult<()> {
     let mut carver = Carver::new(&image);
 
     let scaled_image = carver.resize(config.distance, config.orientation, config.mode);
-    save_image_to_path(scaled_image, config.save_path)?;
+    save_image_to_path(&scaled_image, config.save_path)?;
 
-    if config.save_path_image {
-        let path_image = carver.get_path_image();
-        save_image_to_path(path_image, "debug.png")?;
+    if let Some(debug_image_path) = config.debug_image_path {
+        let debug_image = create_debug_image(&scaled_image, &carver.get_debug_points());
+        save_image_to_path(&debug_image, debug_image_path)?;
     }
     Ok(())
 }
 
-fn save_image_to_path<P: AsRef<Path>>(image: DynamicImage, path: P) -> BoxResult<()> {
+fn save_image_to_path<P: AsRef<Path>>(image: &DynamicImage, path: P) -> BoxResult<()> {
     let mut file = File::create(path)?;
     image.save(&mut file, ImageFormat::PNG)?;
     Ok(())
