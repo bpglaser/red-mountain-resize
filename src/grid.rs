@@ -1,9 +1,9 @@
-pub struct Grid<T: Clone> {
+pub struct Grid<T> {
     points: Vec<Vec<T>>,
     rotated: bool,
 }
 
-impl<T: Clone> Grid<T> {
+impl<T> Grid<T> {
     pub fn new(points: Vec<Vec<T>>) -> Self {
         let rotated = false;
         Self { points, rotated }
@@ -115,6 +115,19 @@ impl<T: Clone> Grid<T> {
         }
     }
 
+    pub fn remove_last_column(&mut self) {
+        let expect_msg = "Attempted to remove column from empty grid";
+        if self.rotated {
+            self.points.pop().expect(expect_msg);
+        } else {
+            for mut row in self.points.iter_mut() {
+                row.pop().expect(expect_msg);
+            }
+        }
+    }
+}
+
+impl<T: Clone> Grid<T> {
     pub fn shift_row_left_from_point(&mut self, x: usize, y: usize) {
         for x in x..(self.width() - 1) {
             *self.get_mut(x, y) = self.get(x + 1, y).clone();
@@ -124,17 +137,6 @@ impl<T: Clone> Grid<T> {
     pub fn shift_row_right_from_point(&mut self, x: usize, y: usize) {
         for x in (x + 1..self.width()).rev() {
             *self.get_mut(x, y) = self.get(x - 1, y).clone();
-        }
-    }
-
-    pub fn remove_last_column(&mut self) {
-        let expect_msg = "Attempted to remove column from empty grid";
-        if self.rotated {
-            self.points.pop().expect(expect_msg);
-        } else {
-            for mut row in self.points.iter_mut() {
-                row.pop().expect(expect_msg);
-            }
         }
     }
 
@@ -152,13 +154,13 @@ impl<T: Clone> Grid<T> {
     }
 }
 
-pub struct PointIter<'a, T: 'a + Clone> {
+pub struct PointIter<'a, T: 'a> {
     x: usize,
     y: usize,
     grid: &'a Grid<T>,
 }
 
-impl<'a, T: Clone> Iterator for PointIter<'a, T> {
+impl<'a, T> Iterator for PointIter<'a, T> {
     type Item = (usize, usize, &'a T);
     fn next(&mut self) -> Option<Self::Item> {
         if self.y >= self.grid.height() {

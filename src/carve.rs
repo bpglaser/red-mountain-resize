@@ -19,8 +19,7 @@ pub struct Carver {
 
 impl Carver {
     pub fn new(image: &DynamicImage) -> Self {
-        let peps = get_pep_grid(image);
-        let grid = Grid::new(peps);
+        let grid = image.into();
         Self {
             grid,
             debug_points: vec![],
@@ -198,23 +197,27 @@ impl Carver {
     }
 }
 
-fn get_pep_grid(image: &DynamicImage) -> Vec<Vec<PixelEnergyPoint>> {
-    let (width, height) = image.dimensions();
-    let mut columns = vec![];
-    for y in 0..height {
-        let mut row = vec![];
-        for x in 0..width {
-            let pixel = image.get_pixel(x, y);
-            let pep = PixelEnergyPoint {
-                pixel,
-                energy: 0,
-                path_cost: 0,
-            };
-            row.push(pep);
+impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
+    fn from(image: &'a DynamicImage) -> Self {
+        let (width, height) = image.dimensions();
+
+        let mut columns = vec![];
+        for y in 0..height {
+            let mut row = vec![];
+            for x in 0..width {
+                let pixel = image.get_pixel(x, y);
+                let pep = PixelEnergyPoint {
+                    pixel,
+                    energy: 0,
+                    path_cost: 0,
+                };
+                row.push(pep);
+            }
+            columns.push(row);
         }
-        columns.push(row);
+
+        Grid::new(columns)
     }
-    columns
 }
 
 fn square_gradient(pep1: &PixelEnergyPoint, pep2: &PixelEnergyPoint) -> usize {
