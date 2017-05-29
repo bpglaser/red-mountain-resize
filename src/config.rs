@@ -47,7 +47,7 @@ fn validate_distance(s: String) -> Result<(), String> {
 pub struct Config {
     pub file_path: PathBuf,
     pub save_path: PathBuf,
-    pub distance: u32,
+    pub distance: usize,
     pub orientation: Orientation,
     pub mode: Mode,
     pub debug_image_path: Option<String>,

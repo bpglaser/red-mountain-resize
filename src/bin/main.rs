@@ -7,9 +7,8 @@ use std::path::Path;
 use image::{DynamicImage, ImageFormat};
 
 use rmr::BoxResult;
-use rmr::config::{Config, Mode, parse_args};
-use rmr::grow::Grower;
-use rmr::shrink::Shrinker;
+use rmr::carve::{Carver, create_debug_image};
+use rmr::config::{Config, parse_args};
 
 fn main() {
     parse_args().and_then(run).unwrap()
@@ -17,23 +16,16 @@ fn main() {
 
 fn run(config: Config) -> BoxResult<()> {
     let image = image::open(config.file_path)?;
+    let mut carver = Carver::new(&image);
 
-    let scaled_image = match config.mode {
-        Mode::Grow => grow(&image, config.distance),
-        Mode::Shrink => shrink(&image, config.distance),
-    };
+    let scaled_image = carver.resize(config.distance, config.orientation, config.mode);
+    save_image_to_path(&scaled_image, config.save_path)?;
 
-    save_image_to_path(&scaled_image, config.save_path)
-}
-
-fn grow(image: &DynamicImage, distance: u32) -> DynamicImage {
-    let grower = Grower::new(&image);
-    grower.create_enlarged_image(distance)
-}
-
-fn shrink(image: &DynamicImage, distance: u32) -> DynamicImage {
-    let shrinker = Shrinker::new(&image, distance);
-    shrinker.create_reduced_image()
+    if let Some(debug_image_path) = config.debug_image_path {
+        let debug_image = create_debug_image(&image, &carver.get_debug_points());
+        save_image_to_path(&debug_image, debug_image_path)?;
+    }
+    Ok(())
 }
 
 fn save_image_to_path<P: AsRef<Path>>(image: &DynamicImage, path: P) -> BoxResult<()> {
