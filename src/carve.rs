@@ -2,15 +2,8 @@ use image::{DynamicImage, GenericImage, Pixel, Rgba};
 use num_traits::ToPrimitive;
 
 use config::{Mode, Orientation};
+use energy::PixelEnergyPoint;
 use grid::Grid;
-
-
-#[derive(Clone)]
-struct PixelEnergyPoint {
-    pixel: Rgba<u8>,
-    energy: usize,
-    path_cost: usize,
-}
 
 pub struct Carver {
     grid: Grid<PixelEnergyPoint>,
@@ -164,11 +157,7 @@ impl Carver {
     }
 
     fn add_point(&mut self, x: usize, y: usize, pixel: Rgba<u8>) {
-        let pep = PixelEnergyPoint {
-            pixel,
-            energy: 0,
-            path_cost: 0,
-        };
+        let pep = pixel.into();
         self.grid.shift_row_right_from_point(x, y);
         *self.grid.get_mut(x + 1, y) = pep;
     }
@@ -194,29 +183,6 @@ impl Carver {
             image.put_pixel(x as u32, y as u32, pep.pixel);
         }
         image
-    }
-}
-
-impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
-    fn from(image: &'a DynamicImage) -> Self {
-        let (width, height) = image.dimensions();
-
-        let mut columns = vec![];
-        for y in 0..height {
-            let mut row = vec![];
-            for x in 0..width {
-                let pixel = image.get_pixel(x, y);
-                let pep = PixelEnergyPoint {
-                    pixel,
-                    energy: 0,
-                    path_cost: 0,
-                };
-                row.push(pep);
-            }
-            columns.push(row);
-        }
-
-        Grid::new(columns)
     }
 }
 

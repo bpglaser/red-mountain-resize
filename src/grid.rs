@@ -1,3 +1,7 @@
+use image::{DynamicImage, GenericImage};
+
+use energy::PixelEnergyPoint;
+
 pub struct Grid<T> {
     points: Vec<Vec<T>>,
     rotated: bool,
@@ -125,6 +129,10 @@ impl<T> Grid<T> {
             }
         }
     }
+
+    pub fn mark_removed(&mut self, x: usize, y: usize) {
+        unimplemented!()
+    }
 }
 
 impl<T: Clone> Grid<T> {
@@ -151,6 +159,25 @@ impl<T: Clone> Grid<T> {
                 row.push(clone);
             }
         }
+    }
+}
+
+impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
+    fn from(image: &'a DynamicImage) -> Self {
+        let (width, height) = image.dimensions();
+
+        let mut columns = vec![];
+        for y in 0..height {
+            let mut row = vec![];
+            for x in 0..width {
+                let pixel = image.get_pixel(x, y);
+                let pep = pixel.into();
+                row.push(pep);
+            }
+            columns.push(row);
+        }
+
+        Grid::new(columns)
     }
 }
 
