@@ -49,8 +49,30 @@ impl Carver {
     }
 
     fn grow_distance(&mut self, distance: usize) {
-        unimplemented!()
+        let points = self.get_points_removed_by_shrink(distance);
+
+        for _ in 0..distance {
+            self.grid.add_last_column();
+        }
+
+        for (x, y) in points {
+            let left = self.grid.get(x, y).pixel;
+            let pixel = self.average_pixel_from_neighbors(x, y, left);
+            self.add_point(x, y, pixel)
+        }
     }
+
+    fn get_points_removed_by_shrink(&self, distance: usize) -> Vec<(usize, usize)> {
+        let mut shrinker = self.clone();
+        shrinker.shrink_distance(distance);
+        let mut points = shrinker.get_removed_points();
+
+        // Reverse sort by x values
+        points.sort_by(|a, b| b.0.cmp(&a.0));
+
+        points
+    }
+
 
     fn shrink_distance(&mut self, distance: usize) {
         for _ in 0..distance {
@@ -116,16 +138,6 @@ impl Carver {
         (x, y)
     }
 
-    fn get_multiple_path_starts(&self, count: usize) -> Vec<(usize, usize)> {
-        let mut points = self.grid.get_row_with_coords(self.grid.height() - 1);
-        points.sort_by_key(|&(_, _, pep)| pep.path_cost);
-        points
-            .into_iter()
-            .map(|(x, y, _)| (x, y))
-            .take(count)
-            .collect()
-    }
-
     fn get_parent_with_min_path_cost(&self, x: usize, y: usize) -> Option<(usize, usize)> {
         self.grid
             .get_parents(x, y)
@@ -162,26 +174,6 @@ impl Carver {
         image
     }
 }
-
-impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
-    fn from(image: &'a DynamicImage) -> Self {
-        let (width, height) = image.dimensions();
-
-        let mut columns = vec![];
-        for y in 0..height {
-            let mut row = vec![];
-            for x in 0..width {
-                let pixel = image.get_pixel(x, y);
-                let pep = pixel.into();
-                row.push(pep);
-            }
-            columns.push(row);
-        }
-
-        Grid::new(columns)
-    }
-}
-
 
 fn average_pixels(pixel1: &[u8; 4], pixel2: &[u8; 4]) -> [u8; 4] {
     [((pixel1[0] as u16 + pixel2[0] as u16) / 2) as u8,
