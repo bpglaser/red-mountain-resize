@@ -5,20 +5,24 @@ An image resize tool utilizing seam carving.
 - [x] Energy grid calculation
 - [x] Image Reduction
 - [ ] UX finalized
-- [ ] Image Enlargement
+- [x] Image Enlargement
 - [ ] Reduction/Enlargement in both directions
 - [ ] Investigate multithreading options via Rayon.
 
 ### Example
 
-Before:
+Original:
 
 <img src="images/castle.jpg" width="512">
 
-100 seams removed:
+Seams selected:
 
 <img src="images/debug.png" width="512">
 
-After:
+100 seams removed:
 
-<img src="images/output.jpg" width="487">
+<img src="images/shrink.jpg" width="487">
+
+100 seams added:
+
+<img src="images/grow.jpg" width="537">
