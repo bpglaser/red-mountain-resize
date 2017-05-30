@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Grid<T> {
     points: Vec<Vec<T>>,
     rotated: bool,

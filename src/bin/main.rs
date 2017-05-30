@@ -22,7 +22,7 @@ fn run(config: Config) -> BoxResult<()> {
     save_image_to_path(&scaled_image, config.save_path)?;
 
     if let Some(debug_image_path) = config.debug_image_path {
-        let debug_image = create_debug_image(&image, &carver.get_debug_points());
+        let debug_image = create_debug_image(&image, &carver.get_removed_points());
         save_image_to_path(&debug_image, debug_image_path)?;
     }
     Ok(())

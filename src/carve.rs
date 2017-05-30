@@ -1,20 +1,13 @@
-use image::{DynamicImage, GenericImage, Pixel, Rgba};
-use num_traits::ToPrimitive;
+use image::{DynamicImage, GenericImage, Rgba};
 
 use config::{Mode, Orientation};
+use energy::PixelEnergyPoint;
 use grid::Grid;
 
-
 #[derive(Clone)]
-struct PixelEnergyPoint {
-    pixel: Rgba<u8>,
-    energy: usize,
-    path_cost: usize,
-}
-
 pub struct Carver {
     grid: Grid<PixelEnergyPoint>,
-    debug_points: Vec<(usize, usize)>,
+    removed_points: Vec<(usize, usize)>,
 }
 
 impl Carver {
@@ -22,7 +15,7 @@ impl Carver {
         let grid = image.into();
         Self {
             grid,
-            debug_points: vec![],
+            removed_points: vec![],
         }
     }
 
@@ -44,8 +37,8 @@ impl Carver {
         self.rebuild_image()
     }
 
-    pub fn get_debug_points(&self) -> Vec<(usize, usize)> {
-        self.debug_points.clone()
+    pub fn get_removed_points(&self) -> Vec<(usize, usize)> {
+        self.removed_points.clone()
     }
 
     fn resize_distance(&mut self, distance: usize, mode: Mode) {
@@ -56,29 +49,7 @@ impl Carver {
     }
 
     fn grow_distance(&mut self, distance: usize) {
-        self.calculate_energy();
-
-        let mut points = vec![];
-        for (start_x, start_y) in self.get_multiple_path_starts(distance) {
-            for (x, y) in self.find_path(start_x, start_y) {
-                points.push((x, y));
-            }
-        }
-
-        // Sort points by reversed x pos
-        points.sort_by(|a, b| b.0.cmp(&a.0));
-
-        // Expand the grid to hold new points
-        for _ in 0..distance {
-            self.grid.add_last_column();
-        }
-
-        for (x, y) in points {
-            let left = self.grid.get(x, y).pixel;
-            let pixel = self.average_pixel_from_neighbors(x, y, left);
-            self.add_point(x, y, pixel);
-            self.debug_points.push((x, y));
-        }
+        unimplemented!()
     }
 
     fn shrink_distance(&mut self, distance: usize) {
@@ -102,8 +73,8 @@ impl Carver {
     fn calculate_pixel_energy(&mut self, x: usize, y: usize) {
         let energy = {
             let (left, right, up, down) = self.grid.get_adjacent(x, y);
-            let horizontal_square_gradient = square_gradient(left, right);
-            let vertical_square_gradient = square_gradient(up, down);
+            let horizontal_square_gradient = left.square_gradient(right);
+            let vertical_square_gradient = up.square_gradient(down);
             horizontal_square_gradient + vertical_square_gradient
         };
         self.grid.get_mut(x, y).energy = energy;
@@ -164,13 +135,8 @@ impl Carver {
     }
 
     fn add_point(&mut self, x: usize, y: usize, pixel: Rgba<u8>) {
-        let pep = PixelEnergyPoint {
-            pixel,
-            energy: 0,
-            path_cost: 0,
-        };
         self.grid.shift_row_right_from_point(x, y);
-        *self.grid.get_mut(x + 1, y) = pep;
+        *self.grid.get_mut(x + 1, y) = pixel.into();
     }
 
     fn average_pixel_from_neighbors(&self, x: usize, y: usize, left: Rgba<u8>) -> Rgba<u8> {
@@ -181,7 +147,7 @@ impl Carver {
 
     fn remove_path(&mut self, points: Vec<(usize, usize)>) {
         for (x, y) in points {
-            self.debug_points.push((x, y));
+            self.removed_points.push((x, y));
             self.grid.shift_row_left_from_point(x, y);
         }
         self.grid.remove_last_column();
@@ -206,11 +172,7 @@ impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
             let mut row = vec![];
             for x in 0..width {
                 let pixel = image.get_pixel(x, y);
-                let pep = PixelEnergyPoint {
-                    pixel,
-                    energy: 0,
-                    path_cost: 0,
-                };
+                let pep = pixel.into();
                 row.push(pep);
             }
             columns.push(row);
@@ -220,25 +182,6 @@ impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
     }
 }
 
-fn square_gradient(pep1: &PixelEnergyPoint, pep2: &PixelEnergyPoint) -> usize {
-    let pixel1 = pep1.pixel;
-    let pixel2 = pep2.pixel;
-
-    let pixel1_channels = pixel1.channels();
-    let pixel2_channels = pixel2.channels();
-
-    let mut sum = 0;
-    for i in 0..pixel1_channels.len() {
-        let a = pixel1_channels[i]
-            .to_isize()
-            .expect("Unable to convert value");
-        let b = pixel2_channels[i]
-            .to_isize()
-            .expect("Unable to convert value");
-        sum += (a - b).abs().pow(2); // Squared abs difference
-    }
-    sum as usize
-}
 
 fn average_pixels(pixel1: &[u8; 4], pixel2: &[u8; 4]) -> [u8; 4] {
     [((pixel1[0] as u16 + pixel2[0] as u16) / 2) as u8,
