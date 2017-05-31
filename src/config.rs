@@ -13,12 +13,14 @@ pub fn parse_args() -> BoxResult<Config> {
                  .long("width")
                  .value_name("WIDTH")
                  .takes_value(true)
+                 .validator(validate_dist)
                  .allow_hyphen_values(true))
         .arg(Arg::with_name("height")
                  .short("h")
                  .long("height")
                  .value_name("HEIGHT")
                  .takes_value(true)
+                 .validator(validate_dist)
                  .allow_hyphen_values(true))
         .arg(Arg::with_name("dimensions")
                  .short("d")
@@ -28,6 +30,7 @@ pub fn parse_args() -> BoxResult<Config> {
                  .value_name("WIDTHxHEIGHT")
                  .takes_value(true)
                  .number_of_values(2)
+                 .validator(validate_dimension)
                  .value_delimiter("x"))
         .arg(Arg::with_name("debug_path")
                  .long("debug")
@@ -43,11 +46,27 @@ pub fn parse_args() -> BoxResult<Config> {
                  .takes_value(true))
         .get_matches();
 
-    // TODO remove me and add input validators
-    println!("{:?}", matches);
-    panic!();
-
     Config::try_from(matches)
+}
+
+fn validate_dist(s: String) -> Result<(), String> {
+    match s.parse::<isize>() {
+        Ok(_) => Ok(()),
+        Err(_) => Err("Invalid distance".to_owned()),
+    }
+}
+
+fn validate_dimension(s: String) -> Result<(), String> {
+    match s.parse::<isize>() {
+        Ok(n) => {
+            if n <= 0 {
+                Err("Dimension must be greater than zero".to_owned())
+            } else {
+                Ok(())
+            }
+        }
+        Err(_) => Err("Invalid dimension".to_owned()),
+    }
 }
 
 #[derive(Debug)]
@@ -105,6 +124,9 @@ impl Config {
     }
 
     fn parse_dimensions(s: &str) -> (usize, usize) {
-        unimplemented!()
+        let words: Vec<_> = s.split("x").collect();
+        let x = words[0].parse().expect("x coord usize");
+        let y = words[1].parse().expect("y coord usize");
+        (x, y)
     }
 }
