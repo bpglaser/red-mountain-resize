@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use clap::{App, Arg, ArgMatches};
 
@@ -61,8 +61,25 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn get_output_path(&self) -> PathBuf {
-        unimplemented!()
+    pub fn get_output_path(&mut self) -> &Path {
+        match self.output_path {
+            Some(ref output_path) => &output_path,
+            None => self.get_default_path(),
+        }
+    }
+
+    fn get_default_path(&mut self) -> &Path {
+        let mut output_path = self.input_path.clone();
+
+        let mut stem = self.input_path.file_stem().unwrap().to_owned();
+        stem.push("-resized");
+        output_path.set_file_name(stem);
+
+        let extension = self.input_path.extension().unwrap();
+        output_path.set_extension(extension);
+
+        self.output_path = Some(output_path);
+        self.output_path.as_ref().unwrap()
     }
 
     fn try_from(matches: ArgMatches) -> BoxResult<Self> {

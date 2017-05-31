@@ -14,7 +14,7 @@ fn main() {
     parse_args().and_then(run).unwrap()
 }
 
-fn run(config: Config) -> BoxResult<()> {
+fn run(mut config: Config) -> BoxResult<()> {
     let image = image::open(config.input_path)?;
     let mut carver = Carver::new(&image);
 
