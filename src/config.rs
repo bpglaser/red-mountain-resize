@@ -29,7 +29,7 @@ pub fn parse_args() -> BoxResult<Config> {
                  .takes_value(true)
                  .number_of_values(2)
                  .value_delimiter("x"))
-        .arg(Arg::with_name("debug")
+        .arg(Arg::with_name("debug_path")
                  .long("debug")
                  .value_name("DEBUG_PATH")
                  .takes_value(true))
@@ -50,72 +50,44 @@ pub fn parse_args() -> BoxResult<Config> {
     Config::try_from(matches)
 }
 
-fn validate_distance(s: String) -> Result<(), String> {
-    s.parse::<usize>()
-        .map(|_| ())
-        .map_err(|_| "Invalid distance provided.".to_owned())
-}
-
 #[derive(Debug)]
 pub struct Config {
-    pub file_path: PathBuf,
-    pub save_path: PathBuf,
-    pub distance: usize,
-    pub orientation: Orientation,
-    pub mode: Mode,
-    pub debug_image_path: Option<String>,
+    pub input_path: PathBuf,
+    pub output_path: Option<PathBuf>,
+    pub width: Option<isize>,
+    pub height: Option<isize>,
+    pub dimensions: Option<(usize, usize)>,
+    pub debug_path: Option<PathBuf>,
 }
 
 impl Config {
+    pub fn get_output_path(&self) -> PathBuf {
+        unimplemented!()
+    }
+
     fn try_from(matches: ArgMatches) -> BoxResult<Self> {
-        let file_path = matches
-            .value_of("file_path")
-            .ok_or("No file path given.")?
+        let input_path = matches
+            .value_of("input_path")
+            .expect("the input path")
             .into();
 
-        let save_path = matches
-            .value_of("save_path")
-            .ok_or("No save path given.")?
-            .into();
+        let output_path = matches.value_of("output_path").map(|s| s.into());
+        let width = matches.value_of("width").and_then(|s| s.parse().ok());
+        let height = matches.value_of("height").and_then(|s| s.parse().ok());
+        let dimensions = matches.value_of("dimensions").map(Config::parse_dimensions);
+        let debug_path = matches.value_of("debug_path").map(|s| s.into());
 
-        let distance = matches
-            .value_of("distance")
-            .ok_or("No distance given.")?
-            .parse()?;
-
-        let orientation = if matches.is_present("horizontal") {
-            Orientation::Horizontal
-        } else {
-            Orientation::Vertical
-        };
-
-        let mode = if matches.is_present("grow") {
-            Mode::Grow
-        } else {
-            Mode::Shrink
-        };
-
-        let debug_image_path = matches.value_of("debug").map(|s| s.to_owned());
-
-        Ok(Self {
-               file_path,
-               save_path,
-               distance,
-               orientation,
-               mode,
-               debug_image_path,
+        Ok(Config {
+               input_path,
+               output_path,
+               width,
+               height,
+               dimensions,
+               debug_path,
            })
     }
-}
 
-#[derive(Clone, Copy, Debug)]
-pub enum Orientation {
-    Horizontal,
-    Vertical,
-}
-
-#[derive(Clone, Copy, Debug)]
-pub enum Mode {
-    Grow,
-    Shrink,
+    fn parse_dimensions(s: &str) -> (usize, usize) {
+        unimplemented!()
+    }
 }

@@ -1,6 +1,5 @@
 use image::{DynamicImage, GenericImage, Rgba};
 
-use config::{Mode, Orientation};
 use energy::PixelEnergyPoint;
 use grid::Grid;
 
@@ -19,33 +18,24 @@ impl Carver {
         }
     }
 
-    pub fn resize(&mut self,
-                  distance: usize,
-                  orientation: Orientation,
-                  mode: Mode)
-                  -> DynamicImage {
+    pub fn shrink_width(&mut self, distance: usize) -> DynamicImage {
+        unimplemented!()
+    }
 
-        match orientation {
-            Orientation::Horizontal => self.resize_distance(distance, mode),
-            Orientation::Vertical => {
-                self.grid.rotate();
-                self.resize_distance(distance, mode);
-                self.grid.rotate();
-            }
-        }
+    pub fn grow_width(&mut self, distance: usize) -> DynamicImage {
+        unimplemented!()
+    }
 
-        self.rebuild_image()
+    pub fn shrink_height(&mut self, distance: usize) -> DynamicImage {
+        unimplemented!()
+    }
+
+    pub fn grow_height(&mut self, distance: usize) -> DynamicImage {
+        unimplemented!()
     }
 
     pub fn get_removed_points(&self) -> Vec<(usize, usize)> {
         self.removed_points.clone()
-    }
-
-    fn resize_distance(&mut self, distance: usize, mode: Mode) {
-        match mode {
-            Mode::Grow => self.grow_distance(distance),
-            Mode::Shrink => self.shrink_distance(distance),
-        }
     }
 
     fn grow_distance(&mut self, distance: usize) {
