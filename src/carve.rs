@@ -18,19 +18,7 @@ impl Carver {
         }
     }
 
-    pub fn shrink_width(&mut self, distance: usize) -> DynamicImage {
-        unimplemented!()
-    }
-
-    pub fn grow_width(&mut self, distance: usize) -> DynamicImage {
-        unimplemented!()
-    }
-
-    pub fn shrink_height(&mut self, distance: usize) -> DynamicImage {
-        unimplemented!()
-    }
-
-    pub fn grow_height(&mut self, distance: usize) -> DynamicImage {
+    pub fn resize(&mut self, width: usize, height: usize) -> DynamicImage {
         unimplemented!()
     }
 

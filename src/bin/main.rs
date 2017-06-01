@@ -4,7 +4,7 @@ extern crate rmr;
 use std::fs::File;
 use std::path::Path;
 
-use image::{DynamicImage, ImageFormat};
+use image::{DynamicImage, GenericImage, ImageFormat};
 
 use rmr::BoxResult;
 use rmr::carve::{Carver, create_debug_image};
@@ -18,7 +18,8 @@ fn run(mut config: Config) -> BoxResult<()> {
     let image = image::open(&config.input_path)?;
     let mut carver = Carver::new(&image);
 
-    let scaled_image = scale_image(&mut carver, &config);
+    let (width, height) = get_target_dimensions(&image, &config);
+    let scaled_image = carver.resize(width as usize, height as usize); // TODO usize -> u32
     save_image_to_path(&scaled_image, config.get_output_path())?;
 
     if let Some(debug_path) = config.debug_path {
@@ -29,8 +30,30 @@ fn run(mut config: Config) -> BoxResult<()> {
     Ok(())
 }
 
-fn scale_image(carver: &mut Carver, config: &Config) -> DynamicImage {
-    unimplemented!() //TODO determine what carve operations to preform
+fn get_target_dimensions(image: &DynamicImage, config: &Config) -> (u32, u32) {
+    if let Some(dimensions) = config.dimensions {
+        return dimensions
+    }
+
+    let (mut width, mut height) = image.dimensions();
+
+    if let Some(delta_width) = config.width {
+        if delta_width >= 0 {
+            width += delta_width as u32;
+        } else {
+            width -= delta_width.abs() as u32;
+        }
+    }
+
+    if let Some(delta_height) = config.height {
+        if delta_height >= 0 {
+            height += delta_height as u32;
+        } else {
+            height -= delta_height.abs() as u32;
+        }
+    }
+
+    (width, height)
 }
 
 fn save_image_to_path<P: AsRef<Path>>(image: &DynamicImage, path: P) -> BoxResult<()> {

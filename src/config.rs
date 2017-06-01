@@ -73,9 +73,9 @@ fn validate_dimension(s: String) -> Result<(), String> {
 pub struct Config {
     pub input_path: PathBuf,
     pub output_path: Option<PathBuf>,
-    pub width: Option<isize>,
-    pub height: Option<isize>,
-    pub dimensions: Option<(usize, usize)>,
+    pub width: Option<i32>,
+    pub height: Option<i32>,
+    pub dimensions: Option<(u32, u32)>,
     pub debug_path: Option<PathBuf>,
 }
 
@@ -123,7 +123,7 @@ impl Config {
            })
     }
 
-    fn parse_dimensions(s: &str) -> (usize, usize) {
+    fn parse_dimensions(s: &str) -> (u32, u32) {
         let words: Vec<_> = s.split("x").collect();
         let x = words[0].parse().expect("x coord usize");
         let y = words[1].parse().expect("y coord usize");
