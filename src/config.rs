@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use clap::{App, Arg, ArgMatches};
+use clap::{App, Arg, ArgMatches, Values};
 
 use BoxResult;
 
@@ -110,7 +110,11 @@ impl Config {
         let output_path = matches.value_of("output_path").map(|s| s.into());
         let width = matches.value_of("width").and_then(|s| s.parse().ok());
         let height = matches.value_of("height").and_then(|s| s.parse().ok());
-        let dimensions = matches.value_of("dimensions").map(Config::parse_dimensions);
+
+        let dimensions = matches
+            .values_of("dimensions")
+            .map(Config::parse_dimensions);
+
         let debug_path = matches.value_of("debug_path").map(|s| s.into());
 
         Ok(Config {
@@ -123,10 +127,9 @@ impl Config {
            })
     }
 
-    fn parse_dimensions(s: &str) -> (u32, u32) {
-        let words: Vec<_> = s.split("x").collect();
-        let x = words[0].parse().expect("x coord usize");
-        let y = words[1].parse().expect("y coord usize");
+    fn parse_dimensions(mut values: Values) -> (u32, u32) {
+        let x = values.next().and_then(|s| s.parse().ok()).expect("x value");
+        let y = values.next().and_then(|s| s.parse().ok()).expect("y value");
         (x, y)
     }
 }

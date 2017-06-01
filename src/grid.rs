@@ -112,6 +112,10 @@ impl<T> Grid<T> {
         self.rotated = !self.rotated;
     }
 
+    pub fn is_rotated(&self) -> bool {
+        self.rotated
+    }
+
     pub fn coord_iter(&self) -> PointIter<T> {
         PointIter {
             x: 0,

@@ -19,7 +19,27 @@ impl Carver {
     }
 
     pub fn resize(&mut self, width: usize, height: usize) -> DynamicImage {
-        unimplemented!()
+        let grid_width = self.grid.width();
+        let grid_height = self.grid.height();
+
+        if width > grid_width {
+            self.grow_distance(width - grid_width);
+        } else if width < grid_width {
+            self.shrink_distance(grid_width - width);
+        }
+
+        if height != grid_height {
+            self.grid.rotate();
+
+            if height > grid_height {
+                self.grow_distance(height - grid_height);
+            } else if height < grid_height {
+                self.shrink_distance(grid_height - height);
+            }
+
+            self.grid.rotate();
+        }
+        self.rebuild_image()
     }
 
     pub fn get_removed_points(&self) -> Vec<(usize, usize)> {
@@ -137,7 +157,11 @@ impl Carver {
 
     fn remove_path(&mut self, points: Vec<(usize, usize)>) {
         for (x, y) in points {
-            self.removed_points.push((x, y));
+            if self.grid.is_rotated() {
+                self.removed_points.push((y, x));
+            } else {
+                self.removed_points.push((x, y));
+            }
             self.grid.shift_row_left_from_point(x, y);
         }
         self.grid.remove_last_column();

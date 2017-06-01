@@ -32,7 +32,7 @@ fn run(mut config: Config) -> BoxResult<()> {
 
 fn get_target_dimensions(image: &DynamicImage, config: &Config) -> (u32, u32) {
     if let Some(dimensions) = config.dimensions {
-        return dimensions
+        return dimensions;
     }
 
     let (mut width, mut height) = image.dimensions();
