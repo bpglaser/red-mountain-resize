@@ -4,7 +4,7 @@ An image resize tool utilizing seam carving.
 ### Roadmap
 - [x] Energy grid calculation
 - [x] Image Reduction
-- [ ] UX finalized
+- [x] UX finalized
 - [x] Image Enlargement
 - [ ] Reduction/Enlargement in both directions
 - [ ] Investigate multithreading options via Rayon.
