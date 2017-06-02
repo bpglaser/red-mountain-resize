@@ -19,26 +19,25 @@ impl Carver {
     }
 
     pub fn resize(&mut self, width: usize, height: usize) -> DynamicImage {
-        let grid_width = self.grid.width();
-        let grid_height = self.grid.height();
+        let initial_width = self.grid.width();
+        let initial_height = self.grid.height();
 
-        if width > grid_width {
-            self.grow_distance(width - grid_width);
-        } else if width < grid_width {
-            self.shrink_distance(grid_width - width);
+        if width > initial_width {
+            self.grow_distance(width - initial_width);
+        } else if width < initial_width {
+            self.shrink_distance(initial_width - width);
         }
 
-        if height != grid_height {
-            self.grid.rotate();
-
-            if height > grid_height {
-                self.grow_distance(height - grid_height);
-            } else if height < grid_height {
-                self.shrink_distance(grid_height - height);
-            }
-
-            self.grid.rotate();
+        if height > initial_height {
+            self.rotate();
+            self.grow_distance(height - initial_height);
+            self.rotate();
+        } else if height < initial_height {
+            self.rotate();
+            self.shrink_distance(initial_height - height);
+            self.rotate();
         }
+
         self.rebuild_image()
     }
 
@@ -145,6 +144,7 @@ impl Carver {
     }
 
     fn add_point(&mut self, x: usize, y: usize, pixel: Rgba<u8>) {
+        self.removed_points.push((x, y));
         self.grid.shift_row_right_from_point(x, y);
         *self.grid.get_mut(x + 1, y) = pixel.into();
     }
@@ -157,14 +157,21 @@ impl Carver {
 
     fn remove_path(&mut self, points: Vec<(usize, usize)>) {
         for (x, y) in points {
-            if self.grid.is_rotated() {
-                self.removed_points.push((y, x));
-            } else {
-                self.removed_points.push((x, y));
-            }
+            self.removed_points.push((x, y));
             self.grid.shift_row_left_from_point(x, y);
         }
         self.grid.remove_last_column();
+    }
+
+    fn rotate(&mut self) {
+        self.grid.rotate();
+        self.rotate_removed_points();
+    }
+
+    fn rotate_removed_points(&mut self) {
+        for point in self.removed_points.iter_mut() {
+            *point = (point.1, point.0);
+        }
     }
 
     fn rebuild_image(&self) -> DynamicImage {
