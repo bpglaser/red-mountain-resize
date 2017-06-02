@@ -6,7 +6,7 @@ use BoxResult;
 
 pub fn parse_args() -> BoxResult<Config> {
     let matches = App::new("Red Mountain Resize")
-        .version("0.1.0")
+        .version(crate_version!())
         .author("Brad Glaser <bpglaser@gmail.com>")
         .arg(Arg::with_name("width")
                  .short("w")
