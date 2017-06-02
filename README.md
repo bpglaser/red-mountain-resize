@@ -6,7 +6,7 @@ An image resize tool utilizing seam carving.
 - [x] Image Reduction
 - [x] UX finalized
 - [x] Image Enlargement
-- [ ] Reduction/Enlargement in both directions
+- [x] Reduction/Enlargement in both directions
 - [ ] Investigate multithreading options via Rayon.
 
 ### Example
