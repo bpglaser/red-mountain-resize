@@ -61,6 +61,7 @@ impl Carver {
 
     fn get_points_removed_by_shrink(&self, distance: usize) -> Vec<(usize, usize)> {
         let mut shrinker = self.clone();
+        shrinker.removed_points.clear();
         shrinker.shrink_distance(distance);
         let mut points = shrinker.get_removed_points();
 
