@@ -44,6 +44,9 @@ pub fn parse_args() -> BoxResult<Config> {
                  .required(false)
                  .value_name("OUTPUT_PATH")
                  .takes_value(true))
+        .arg(Arg::with_name("time")
+                .short("t")
+                .long("time"))
         .get_matches();
 
     Config::try_from(matches)
@@ -77,6 +80,7 @@ pub struct Config {
     pub height: Option<i32>,
     pub dimensions: Option<(u32, u32)>,
     pub debug_path: Option<PathBuf>,
+    pub time: bool,
 }
 
 impl Config {
@@ -117,6 +121,8 @@ impl Config {
 
         let debug_path = matches.value_of("debug_path").map(|s| s.into());
 
+        let time = matches.is_present("time");
+
         Ok(Config {
                input_path,
                output_path,
@@ -124,6 +130,7 @@ impl Config {
                height,
                dimensions,
                debug_path,
+               time,
            })
     }
 

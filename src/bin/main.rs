@@ -3,6 +3,7 @@ extern crate rmr;
 
 use std::fs::File;
 use std::path::Path;
+use std::time::Instant;
 
 use image::{DynamicImage, GenericImage, ImageFormat};
 
@@ -19,7 +20,22 @@ fn run(mut config: Config) -> BoxResult<()> {
     let mut carver = Carver::new(&image);
 
     let (width, height) = get_target_dimensions(&image, &config);
+
+    let time_start = if config.time {
+        Some(Instant::now())
+    } else {
+        None
+    };
+
     let scaled_image = carver.resize(width as usize, height as usize); // TODO usize -> u32
+
+    if let Some(time_start) = time_start {
+        let duration = time_start.elapsed();
+        let secs = duration.as_secs();
+        let nanos = duration.subsec_nanos();
+        println!("Resing image took: {}.{}", secs, nanos);
+    }
+
     save_image_to_path(&scaled_image, config.get_output_path())?;
 
     if let Some(debug_path) = config.debug_path {
