@@ -431,12 +431,17 @@ fn grid_rotation_remove_last_column_test() {
     assert_eq!(2, grid.width());
     assert_eq!(3, grid.height());
     assert_eq!(&0, grid.get(0, 0));
+    assert_eq!(&1, grid.get(0, 1));
+    assert_eq!(&2, grid.get(0, 2));
+    assert_eq!(&3, grid.get(1, 0));
+    assert_eq!(&4, grid.get(1, 1));
     assert_eq!(&5, grid.get(1, 2));
 
     grid.remove_last_column();
     assert_eq!(1, grid.width());
     assert_eq!(3, grid.height());
     assert_eq!(&0, grid.get(0, 0));
+    assert_eq!(&1, grid.get(0, 1));
     assert_eq!(&2, grid.get(0, 2));
 
     grid.remove_last_column();
