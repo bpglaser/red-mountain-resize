@@ -1,41 +1,47 @@
+use std::mem::swap;
+
 use image::{DynamicImage, GenericImage};
 
 use energy::PixelEnergyPoint;
 
 #[derive(Clone)]
 pub struct Grid<T> {
-    points: Vec<Vec<T>>,
+    width: usize,
+    height: usize,
+    points: Vec<T>,
     rotated: bool,
 }
 
 impl<T> Grid<T> {
-    pub fn new(points: Vec<Vec<T>>) -> Self {
+    pub fn new(points: Vec<T>, width: usize, height: usize) -> Self {
         let rotated = false;
-        Self { points, rotated }
+        Self {
+            width,
+            height,
+            points,
+            rotated,
+        }
     }
 
     pub fn height(&self) -> usize {
         if !self.rotated {
-            self.points.len()
+            self.height
         } else {
-            self.points[0].len()
+            self.width
         }
     }
 
     pub fn width(&self) -> usize {
         if !self.rotated {
-            self.points[0].len()
+            self.width
         } else {
-            self.points.len()
+            self.height
         }
     }
 
     pub fn get(&self, x: usize, y: usize) -> &T {
-        if !self.rotated {
-            &self.points[y][x]
-        } else {
-            &self.points[x][y]
-        }
+        let i = self.get_point_index(x, y);
+        &self.points[i]
     }
 
     pub fn get_adjacent(&self, x: usize, y: usize) -> (&T, &T, &T, &T) {
@@ -101,15 +107,13 @@ impl<T> Grid<T> {
     }
 
     pub fn get_mut(&mut self, x: usize, y: usize) -> &mut T {
-        if !self.rotated {
-            &mut self.points[y][x]
-        } else {
-            &mut self.points[x][y]
-        }
+        let i = self.get_point_index(x, y);
+        &mut self.points[i]
     }
 
     pub fn rotate(&mut self) {
         self.rotated = !self.rotated;
+        swap(&mut self.width, &mut self.height);
     }
 
     pub fn is_rotated(&self) -> bool {
@@ -125,14 +129,16 @@ impl<T> Grid<T> {
     }
 
     pub fn remove_last_column(&mut self) {
-        let expect_msg = "Attempted to remove column from empty grid";
-        if self.rotated {
-            self.points.pop().expect(expect_msg);
-        } else {
-            for mut row in self.points.iter_mut() {
-                row.pop().expect(expect_msg);
-            }
+        let x = self.width - 1;
+        for y in (0..self.height - 1).rev() {
+            let i = self.get_point_index(x, y);
+            self.points.remove(i);
         }
+        self.width -= 1;
+    }
+
+    fn get_point_index(&self, x: usize, y: usize) -> usize {
+        unimplemented!()
     }
 }
 
@@ -150,35 +156,16 @@ impl<T: Clone> Grid<T> {
     }
 
     pub fn add_last_column(&mut self) {
-        let expect_msg = "Attempted to get last from empty grid";
-        if self.rotated {
-            let clone = self.points.last().expect(expect_msg).clone();
-            self.points.push(clone);
-        } else {
-            for mut row in self.points.iter_mut() {
-                let clone = row.last().expect(expect_msg).clone();
-                row.push(clone);
-            }
-        }
+        unimplemented!()
     }
 }
 
 impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
     fn from(image: &'a DynamicImage) -> Self {
+        let points = image.pixels().map(|(_, _, pixel)| pixel.into()).collect();
         let (width, height) = image.dimensions();
 
-        let mut columns = vec![];
-        for y in 0..height {
-            let mut row = vec![];
-            for x in 0..width {
-                let pixel = image.get_pixel(x, y);
-                let pep = pixel.into();
-                row.push(pep);
-            }
-            columns.push(row);
-        }
-
-        Grid::new(columns)
+        Grid::new(points, width as usize, height as usize)
     }
 }
 
