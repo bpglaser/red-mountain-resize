@@ -44,9 +44,7 @@ pub fn parse_args() -> BoxResult<Config> {
                  .required(false)
                  .value_name("OUTPUT_PATH")
                  .takes_value(true))
-        .arg(Arg::with_name("time")
-                .short("t")
-                .long("time"))
+        .arg(Arg::with_name("time").short("t").long("time"))
         .get_matches();
 
     Config::try_from(matches)
