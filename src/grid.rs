@@ -138,7 +138,11 @@ impl<T> Grid<T> {
     }
 
     fn get_point_index(&self, x: usize, y: usize) -> usize {
-        unimplemented!()
+        if !self.rotated {
+            x + y * self.width
+        } else {
+            y + x * self.height
+        }
     }
 }
 
@@ -164,7 +168,6 @@ impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
     fn from(image: &'a DynamicImage) -> Self {
         let points = image.pixels().map(|(_, _, pixel)| pixel.into()).collect();
         let (width, height) = image.dimensions();
-
         Grid::new(points, width as usize, height as usize)
     }
 }
