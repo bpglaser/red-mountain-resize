@@ -139,6 +139,7 @@ impl<T> Grid<T> {
             for _ in 0..self.height() {
                 self.points.pop().unwrap();
             }
+
             self.height -= 1;
         }
     }
@@ -171,12 +172,26 @@ impl<T: Clone> Grid<T> {
 
     pub fn add_last_column(&mut self) {
         let x = self.width() - 1;
-        for y in (0..self.height()).rev() {
-            let i = self.get_point_index(x, y);
-            let cloned_point = self.points[i].clone();
-            self.points.insert(i + 1, cloned_point);
+
+        if !self.is_rotated() {
+            for y in (0..self.height()).rev() {
+                let i = self.get_point_index(x, y);
+                let cloned_point = self.points[i].clone();
+                self.points.insert(i + 1, cloned_point);
+            }
+        } else {
+            for y in 0..self.height() {
+                let i = self.get_point_index(x, y);
+                let cloned_point = self.points[i].clone();
+                self.points.push(cloned_point);
+            }
         }
-        self.width += 1; // TODO add rotate conditional
+
+        if !self.is_rotated() {
+            self.width += 1;
+        } else {
+            self.height += 1;
+        }
     }
 }
 
