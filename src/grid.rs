@@ -171,7 +171,7 @@ impl<T: Clone> Grid<T> {
 
     pub fn add_last_column(&mut self) {
         let x = self.width() - 1;
-        for y in (0..self.height() - 1).rev() {
+        for y in (0..self.height()).rev() {
             let i = self.get_point_index(x, y);
             let cloned_point = self.points[i].clone();
             self.points.insert(i + 1, cloned_point);
