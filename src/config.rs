@@ -43,10 +43,9 @@ pub fn parse_args() -> BoxResult<Config> {
         .arg(Arg::with_name("output_path")
                  .required(false)
                  .value_name("OUTPUT_PATH")
-                 .takes_value(true))
-        .arg(Arg::with_name("time")
-                .short("t")
-                .long("time"))
+                 .takes_value(true)
+                 .validator(validate_extension))
+        .arg(Arg::with_name("time").short("t").long("time"))
         .get_matches();
 
     Config::try_from(matches)
@@ -69,6 +68,16 @@ fn validate_dimension(s: String) -> Result<(), String> {
             }
         }
         Err(_) => Err("Invalid dimension".to_owned()),
+    }
+}
+
+fn validate_extension(s: String) -> Result<(), String> {
+    let path = Path::new(&s);
+    match path.extension().and_then(|s| s.to_str()) {
+        Some("jpg") => Ok(()),
+        Some("jpeg") => Ok(()),
+        Some("png") => Ok(()),
+        _ => Err("Invalid output extension".to_owned()),
     }
 }
 
