@@ -101,17 +101,18 @@ impl Carver {
     }
 
     fn calculate_path_cost(&mut self, x: usize, y: usize) {
-        let min_parent_path_cost = self.get_min_parent_path_cost(x, y).unwrap_or(0);
+        let min_parent_path_cost = self.get_min_parent_path_cost(x, y);
         let energy = self.grid.get(x, y).energy;
         self.grid.get_mut(x, y).path_cost = min_parent_path_cost + energy;
     }
 
-    fn get_min_parent_path_cost(&self, x: usize, y: usize) -> Option<usize> {
+    fn get_min_parent_path_cost(&self, x: usize, y: usize) -> usize {
         self.grid
             .get_parents(x, y)
-            .iter()
-            .map(|&(_, _, pep)| pep.path_cost)
+            .into_iter()
+            .filter_map(|opt| opt.map(|pep| pep.path_cost))
             .min()
+            .unwrap_or(0)
     }
 
     fn find_path(&self, start_x: usize, start_y: usize) -> Vec<(usize, usize)> {
@@ -138,7 +139,7 @@ impl Carver {
 
     fn get_parent_with_min_path_cost(&self, x: usize, y: usize) -> Option<(usize, usize)> {
         self.grid
-            .get_parents(x, y)
+            .get_parents_indexed(x, y)
             .into_iter()
             .min_by_key(|&(_, _, pep)| pep.path_cost)
             .map(|(x, y, _)| (x, y))

@@ -146,21 +146,41 @@ fn grid_get_parents_test() {
     let grid = make_test_grid();
 
     // First row
-    assert!(grid.get_parents(0, 0).is_empty());
-    assert!(grid.get_parents(1, 0).is_empty());
-    assert!(grid.get_parents(2, 0).is_empty());
+    assert!(grid.get_parents(0, 0).iter().all(Option::is_none));
+    assert!(grid.get_parents(1, 0).iter().all(Option::is_none));
+    assert!(grid.get_parents(2, 0).iter().all(Option::is_none));
 
     // Second row
-    assert_eq!(vec![(0, 0, &0), (1, 0, &1)], grid.get_parents(0, 1));
-    assert_eq!(vec![(0, 0, &0), (1, 0, &1), (2, 0, &2)],
-               grid.get_parents(1, 1));
-    assert_eq!(vec![(1, 0, &1), (2, 0, &2)], grid.get_parents(2, 1));
+    assert_eq!([None, Some(&0), Some(&1)], grid.get_parents(0, 1));
+    assert_eq!([Some(&0), Some(&1), Some(&2)], grid.get_parents(1, 1));
+    assert_eq!([Some(&1), Some(&2), None], grid.get_parents(2, 1));
 
     // Third row
-    assert_eq!(vec![(0, 1, &3), (1, 1, &4)], grid.get_parents(0, 2));
+    assert_eq!([None, Some(&3), Some(&4)], grid.get_parents(0, 2));
+    assert_eq!([Some(&3), Some(&4), Some(&5)], grid.get_parents(1, 2));
+    assert_eq!([Some(&4), Some(&5), None], grid.get_parents(2, 2));
+}
+
+#[test]
+fn grid_get_parents_indexed_test() {
+    let grid = make_test_grid();
+
+    // First row
+    assert!(grid.get_parents_indexed(0, 0).is_empty());
+    assert!(grid.get_parents_indexed(1, 0).is_empty());
+    assert!(grid.get_parents_indexed(2, 0).is_empty());
+
+    // Second row
+    assert_eq!(vec![(0, 0, &0), (1, 0, &1)], grid.get_parents_indexed(0, 1));
+    assert_eq!(vec![(0, 0, &0), (1, 0, &1), (2, 0, &2)],
+               grid.get_parents_indexed(1, 1));
+    assert_eq!(vec![(1, 0, &1), (2, 0, &2)], grid.get_parents_indexed(2, 1));
+
+    // Third row
+    assert_eq!(vec![(0, 1, &3), (1, 1, &4)], grid.get_parents_indexed(0, 2));
     assert_eq!(vec![(0, 1, &3), (1, 1, &4), (2, 1, &5)],
-               grid.get_parents(1, 2));
-    assert_eq!(vec![(1, 1, &4), (2, 1, &5)], grid.get_parents(2, 2));
+               grid.get_parents_indexed(1, 2));
+    assert_eq!(vec![(1, 1, &4), (2, 1, &5)], grid.get_parents_indexed(2, 2));
 }
 
 #[test]
