@@ -106,7 +106,7 @@ impl Carver {
         self.grid.get_mut(x, y).path_cost = min_parent_path_cost + energy;
     }
 
-    fn get_min_parent_path_cost(&self, x: usize, y: usize) -> usize {
+    fn get_min_parent_path_cost(&self, x: usize, y: usize) -> u32 {
         self.grid
             .get_parents(x, y)
             .into_iter()
