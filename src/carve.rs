@@ -45,6 +45,39 @@ impl Carver {
         self.removed_points.clone()
     }
 
+    pub fn calculate_energy(&mut self) {
+        for y in 0..self.grid.height() {
+            for x in 0..self.grid.width() {
+                self.calculate_pixel_energy(x, y);
+                self.calculate_path_cost(x, y);
+            }
+        }
+    }
+
+    pub fn get_pixel_energy(&self) -> Vec<Vec<u32>> {
+        let mut grid = vec![];
+        for y in 0..self.grid.height() {
+            let mut row = vec![];
+            for x in 0..self.grid.width() {
+                row.push(self.grid.get(x, y).energy);
+            }
+            grid.push(row);
+        }
+        grid
+    }
+
+    pub fn get_path_energy(&self) -> Vec<Vec<u32>> {
+        let mut grid = vec![];
+        for y in 0..self.grid.height() {
+            let mut row = vec![];
+            for x in 0..self.grid.width() {
+                row.push(self.grid.get(x, y).path_cost);
+            }
+            grid.push(row);
+        }
+        grid
+    }
+
     fn grow_distance(&mut self, distance: usize) {
         let points = self.get_points_removed_by_shrink(distance);
 
@@ -71,22 +104,12 @@ impl Carver {
         points
     }
 
-
     fn shrink_distance(&mut self, distance: usize) {
         for _ in 0..distance {
             self.calculate_energy();
             let (start_x, start_y) = self.get_path_start();
             let path = self.find_path(start_x, start_y);
             self.remove_path(path);
-        }
-    }
-
-    fn calculate_energy(&mut self) {
-        for y in 0..self.grid.height() {
-            for x in 0..self.grid.width() {
-                self.calculate_pixel_energy(x, y);
-                self.calculate_path_cost(x, y);
-            }
         }
     }
 
