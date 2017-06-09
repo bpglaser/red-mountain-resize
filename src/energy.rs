@@ -10,6 +10,29 @@ pub struct PixelEnergyPoint {
 }
 
 impl PixelEnergyPoint {
+    /// `square_gradient` serves as the basis for calculating energy.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate image;
+    /// # extern crate rmr;
+    /// # use image::Rgba;
+    /// # use rmr::energy::PixelEnergyPoint;
+    /// # fn main() {
+    /// let a: PixelEnergyPoint = Rgba { data: [255, 203, 51, 255] }.into();
+    /// let b: PixelEnergyPoint = Rgba { data: [255, 205, 255, 255] }.into();
+    ///
+    /// let result = a.square_gradient(&b);
+    /// assert_eq!(41620, result);
+    ///
+    /// let a: PixelEnergyPoint = Rgba { data: [255, 255, 153, 255] }.into();
+    /// let b: PixelEnergyPoint = Rgba { data: [255, 153, 153, 255] }.into();
+    ///
+    /// let result = a.square_gradient(&b);
+    /// assert_eq!(10404, result);
+    /// # }
+    /// ```
     pub fn square_gradient(&self, other: &PixelEnergyPoint) -> u32 {
         let pixel1_channels = self.pixel.channels();
         let pixel2_channels = other.pixel.channels();

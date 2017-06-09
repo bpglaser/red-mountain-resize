@@ -5,6 +5,7 @@ authors = ["bpglaser <bpglaser@gmail.com>"]
 
 [[bin]]
 name = "rmr"
+doc = false
 
 [dependencies]
 clap = "2.24.2"
