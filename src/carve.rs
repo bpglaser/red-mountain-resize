@@ -89,6 +89,17 @@ impl Carver {
         (x, y)
     }
 
+    pub fn find_path(&self, start_x: usize, start_y: usize) -> Vec<(usize, usize)> {
+        let mut path = vec![(start_x, start_y)];
+        loop {
+            let &(x, y) = path.last().unwrap();
+            match self.get_parent_with_min_path_cost(x, y) {
+                None => return path,
+                Some(parent) => path.push(parent),
+            }
+        }
+    }
+
     fn grow_distance(&mut self, distance: usize) {
         let points = self.get_points_removed_by_shrink(distance);
 
@@ -147,17 +158,6 @@ impl Carver {
             .filter_map(|opt| opt.map(|pep| pep.path_cost))
             .min()
             .unwrap_or(0)
-    }
-
-    fn find_path(&self, start_x: usize, start_y: usize) -> Vec<(usize, usize)> {
-        let mut path = vec![(start_x, start_y)];
-        loop {
-            let &(x, y) = path.last().unwrap();
-            match self.get_parent_with_min_path_cost(x, y) {
-                None => return path,
-                Some(parent) => path.push(parent),
-            }
-        }
     }
 
     fn get_parent_with_min_path_cost(&self, x: usize, y: usize) -> Option<(usize, usize)> {

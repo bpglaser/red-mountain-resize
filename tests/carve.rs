@@ -35,6 +35,13 @@ fn carver_small_get_path_start_test() {
 }
 
 #[test]
+fn carver_small_find_path_test() {
+    let carver = setup_carver!(SMALL);
+    let (x, y) = carver.get_path_start();
+    assert_eq!(get_small_path(), carver.find_path(x, y));
+}
+
+#[test]
 fn carver_medium_pixel_energy_test() {
     let carver = setup_carver!(MEDIUM);
     let pixel_energy = carver.get_pixel_energy();
@@ -54,6 +61,13 @@ fn carver_medium_get_path_start_test() {
     assert_eq!((2, 4), carver.get_path_start());
 }
 
+#[test]
+fn carver_medium_find_path_test() {
+    let carver = setup_carver!(MEDIUM);
+    let (x, y) = carver.get_path_start();
+    assert_eq!(get_medium_path(), carver.find_path(x, y));
+}
+
 static SMALL: &'static [u8; 173] = include_bytes!("images/small_energy.png");
 static MEDIUM: &'static [u8; 244] = include_bytes!("images/medium_energy.png");
 
@@ -71,6 +85,10 @@ fn get_small_path_energy() -> Vec<Vec<u32>> {
          vec![83233, 114650, 84057]]
 }
 
+fn get_small_path() -> Vec<(usize, usize)> {
+    vec![(0, 3), (0, 2), (0, 1), (0, 0)]
+}
+
 fn get_medium_pixel_energy() -> Vec<Vec<u32>> {
     vec![vec![57685, 50893, 91370, 25418, 33055, 37246],
          vec![15421, 56334, 22808, 54796, 11641, 25496],
@@ -85,4 +103,8 @@ fn get_medium_path_energy() -> Vec<Vec<u32>> {
          vec![78658, 67462, 100256, 54767, 81794, 57722],
          vec![84536, 91140, 85046, 135430, 92598, 103317],
          vec![116873, 115332, 89955, 158380, 133211, 129154]]
+}
+
+fn get_medium_path() -> Vec<(usize, usize)> {
+    vec![(2, 4), (2, 3), (3, 2), (4, 1), (3, 0)]
 }
