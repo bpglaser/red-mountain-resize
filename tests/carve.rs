@@ -29,6 +29,12 @@ fn carver_small_path_energy_test() {
 }
 
 #[test]
+fn carver_small_get_path_start_test() {
+    let carver = setup_carver!(SMALL);
+    assert_eq!((0, 3), carver.get_path_start());
+}
+
+#[test]
 fn carver_medium_pixel_energy_test() {
     let carver = setup_carver!(MEDIUM);
     let pixel_energy = carver.get_pixel_energy();
@@ -40,6 +46,12 @@ fn carver_medium_path_energy_test() {
     let carver = setup_carver!(MEDIUM);
     let path_energy = carver.get_path_energy();
     assert_eq!(get_medium_path_energy(), path_energy);
+}
+
+#[test]
+fn carver_medium_get_path_start_test() {
+    let carver = setup_carver!(MEDIUM);
+    assert_eq!((2, 4), carver.get_path_start());
 }
 
 static SMALL: &'static [u8; 173] = include_bytes!("images/small_energy.png");

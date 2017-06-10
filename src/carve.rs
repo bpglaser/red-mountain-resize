@@ -78,6 +78,17 @@ impl Carver {
         grid
     }
 
+    pub fn get_path_start(&self) -> (usize, usize) {
+        let y = self.grid.height() - 1;
+        let (x, _) = self.grid
+            .get_row(y)
+            .into_iter()
+            .enumerate()
+            .min_by_key(|&(_, pep)| pep.path_cost)
+            .expect("Bottom row should never be empty");
+        (x, y)
+    }
+
     fn grow_distance(&mut self, distance: usize) {
         let points = self.get_points_removed_by_shrink(distance);
 
@@ -147,17 +158,6 @@ impl Carver {
                 Some(parent) => path.push(parent),
             }
         }
-    }
-
-    fn get_path_start(&self) -> (usize, usize) {
-        let y = self.grid.height() - 1;
-        let (x, _) = self.grid
-            .get_row(y)
-            .into_iter()
-            .enumerate()
-            .min_by_key(|&(_, pep)| pep.path_cost)
-            .expect("Bottom row should never be empty");
-        (x, y)
     }
 
     fn get_parent_with_min_path_cost(&self, x: usize, y: usize) -> Option<(usize, usize)> {
