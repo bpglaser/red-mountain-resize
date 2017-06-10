@@ -1,110 +1,68 @@
 extern crate image;
 extern crate rmr;
 
+use image::{DynamicImage, GenericImage};
+
 use rmr::carve::Carver;
 
-macro_rules! setup_carver {
-    ( $bytes:expr ) => {
-        {
-            let input = image::load_from_memory($bytes).unwrap();
-            let mut carver = Carver::new(&input);
-            carver.calculate_energy();
-            carver
-        }
+macro_rules! test_carve {
+    ( $target:expr, $dw:expr, $dh:expr ) => {
+        let input = load(INPUT);
+
+        let (width, height) = input.dimensions();
+        let target_width = (width as isize + $dw) as usize;
+        let target_height = (height as isize + $dh) as usize;
+
+        let mut carver = Carver::new(&input);
+        let output = carver.resize(target_width, target_height);
+
+        assert_eq!(target_width, output.width() as usize);
+        assert_eq!(target_height, output.height() as usize);
+
+        let target = load($target);
+        assert!(target.raw_pixels() == output.raw_pixels(),
+                "Bytes of {} failed to match output", stringify!($target));
     };
 }
 
 #[test]
-fn carver_small_pixel_energy_test() {
-    let carver = setup_carver!(SMALL);
-    let pixel_energy = carver.get_pixel_energy();
-    assert_eq!(get_small_pixel_energy(), pixel_energy);
+fn carver_width_minus_five_test() {
+    test_carve!(WIDTH_MINUS_FIVE, -5, 0);
 }
 
 #[test]
-fn carver_small_path_energy_test() {
-    let carver = setup_carver!(SMALL);
-    let path_energy = carver.get_path_energy();
-    assert_eq!(get_small_path_energy(), path_energy);
+fn carver_width_plus_five_test() {
+    test_carve!(WIDTH_PLUS_FIVE, 5, 0);
 }
 
 #[test]
-fn carver_small_get_path_start_test() {
-    let carver = setup_carver!(SMALL);
-    assert_eq!((0, 3), carver.get_path_start());
+fn carver_height_minus_five_test() {
+    test_carve!(HEIGHT_MINUS_FIVE, 0, -5);
 }
 
 #[test]
-fn carver_small_find_path_test() {
-    let carver = setup_carver!(SMALL);
-    let (x, y) = carver.get_path_start();
-    assert_eq!(get_small_path(), carver.find_path(x, y));
+fn carver_height_plus_five_test() {
+    test_carve!(HEIGHT_PLUS_FIVE, 0, 5);
 }
 
 #[test]
-fn carver_medium_pixel_energy_test() {
-    let carver = setup_carver!(MEDIUM);
-    let pixel_energy = carver.get_pixel_energy();
-    assert_eq!(get_medium_pixel_energy(), pixel_energy);
+fn carver_both_minus_five_test() {
+    test_carve!(BOTH_MINUS_FIVE, -5, -5);
 }
 
 #[test]
-fn carver_medium_path_energy_test() {
-    let carver = setup_carver!(MEDIUM);
-    let path_energy = carver.get_path_energy();
-    assert_eq!(get_medium_path_energy(), path_energy);
+fn carver_both_plus_five_test() {
+    test_carve!(BOTH_PLUS_FIVE, 5, 5);
 }
 
-#[test]
-fn carver_medium_get_path_start_test() {
-    let carver = setup_carver!(MEDIUM);
-    assert_eq!((2, 4), carver.get_path_start());
-}
+static INPUT: &'static [u8; 12022] = include_bytes!("images/input.png");
+static WIDTH_MINUS_FIVE: &'static [u8; 13386] = include_bytes!("images/out-width-minus-five.png");
+static WIDTH_PLUS_FIVE: &'static [u8; 14554] = include_bytes!("images/out-width-plus-five.png");
+static HEIGHT_MINUS_FIVE: &'static [u8; 13371] = include_bytes!("images/out-height-minus-five.png");
+static HEIGHT_PLUS_FIVE: &'static [u8; 14685] = include_bytes!("images/out-height-plus-five.png");
+static BOTH_MINUS_FIVE: &'static [u8; 12759] = include_bytes!("images/out-both-minus-five.png");
+static BOTH_PLUS_FIVE: &'static [u8; 15226] = include_bytes!("images/out-both-plus-five.png");
 
-#[test]
-fn carver_medium_find_path_test() {
-    let carver = setup_carver!(MEDIUM);
-    let (x, y) = carver.get_path_start();
-    assert_eq!(get_medium_path(), carver.find_path(x, y));
-}
-
-static SMALL: &'static [u8; 173] = include_bytes!("images/small_energy.png");
-static MEDIUM: &'static [u8; 244] = include_bytes!("images/medium_energy.png");
-
-fn get_small_pixel_energy() -> Vec<Vec<u32>> {
-    vec![vec![20808, 52020, 20808],
-         vec![20808, 52225, 21220],
-         vec![20809, 52024, 20809],
-         vec![20808, 52225, 21220]]
-}
-
-fn get_small_path_energy() -> Vec<Vec<u32>> {
-    vec![vec![20808, 52020, 20808],
-         vec![41616, 73033, 42028],
-         vec![62425, 93640, 62837],
-         vec![83233, 114650, 84057]]
-}
-
-fn get_small_path() -> Vec<(usize, usize)> {
-    vec![(0, 3), (0, 2), (0, 1), (0, 0)]
-}
-
-fn get_medium_pixel_energy() -> Vec<Vec<u32>> {
-    vec![vec![57685, 50893, 91370, 25418, 33055, 37246],
-         vec![15421, 56334, 22808, 54796, 11641, 25496],
-         vec![12344, 19236, 52030, 17708, 44735, 20663],
-         vec![17074, 23678, 30279, 80663, 37831, 45595],
-         vec![32337, 30796, 4909, 73334, 40613, 36556]]
-}
-
-fn get_medium_path_energy() -> Vec<Vec<u32>> {
-    vec![vec![57685, 50893, 91370, 25418, 33055, 37246],
-         vec![66314, 107227, 48226, 80214, 37059, 58551],
-         vec![78658, 67462, 100256, 54767, 81794, 57722],
-         vec![84536, 91140, 85046, 135430, 92598, 103317],
-         vec![116873, 115332, 89955, 158380, 133211, 129154]]
-}
-
-fn get_medium_path() -> Vec<(usize, usize)> {
-    vec![(2, 4), (2, 3), (3, 2), (4, 1), (3, 0)]
+fn load(bytes: &[u8]) -> DynamicImage {
+    image::load_from_memory(bytes).expect("loaded test image")
 }
