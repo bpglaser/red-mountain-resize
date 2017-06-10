@@ -3,24 +3,28 @@ extern crate rmr;
 
 use rmr::carve::Carver;
 
+macro_rules! setup_carver {
+    ( $bytes:expr ) => {
+        {
+            let input = image::load_from_memory($bytes).unwrap();
+
+            let mut carver = Carver::new(&input);
+            carver.calculate_energy();
+            carver
+        }
+    };
+}
+
 #[test]
 fn carver_small_energy_test() {
-    let input = image::load_from_memory(SMALL).unwrap();
-
-    let mut carver = Carver::new(&input);
-    carver.calculate_energy();
-
+    let carver = setup_carver!(SMALL);
     let energy = carver.get_pixel_energy();
     assert_eq!(get_small_energy(), energy);
 }
 
 #[test]
 fn carver_medium_energy_test() {
-    let input = image::load_from_memory(MEDIUM).unwrap();
-
-    let mut carver = Carver::new(&input);
-    carver.calculate_energy();
-
+    let carver = setup_carver!(MEDIUM);
     let energy = carver.get_pixel_energy();
     assert_eq!(get_medium_energy(), energy);
 }
