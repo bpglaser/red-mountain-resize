@@ -57,11 +57,11 @@ fn carver_both_plus_five_test() {
 
 static INPUT: &'static [u8; 12022] = include_bytes!("images/input.png");
 static WIDTH_MINUS_FIVE: &'static [u8; 13386] = include_bytes!("images/out-width-minus-five.png");
-static WIDTH_PLUS_FIVE: &'static [u8; 14554] = include_bytes!("images/out-width-plus-five.png");
+static WIDTH_PLUS_FIVE: &'static [u8; 14561] = include_bytes!("images/out-width-plus-five.png");
 static HEIGHT_MINUS_FIVE: &'static [u8; 13371] = include_bytes!("images/out-height-minus-five.png");
-static HEIGHT_PLUS_FIVE: &'static [u8; 14685] = include_bytes!("images/out-height-plus-five.png");
+static HEIGHT_PLUS_FIVE: &'static [u8; 14690] = include_bytes!("images/out-height-plus-five.png");
 static BOTH_MINUS_FIVE: &'static [u8; 12759] = include_bytes!("images/out-both-minus-five.png");
-static BOTH_PLUS_FIVE: &'static [u8; 15226] = include_bytes!("images/out-both-plus-five.png");
+static BOTH_PLUS_FIVE: &'static [u8; 15253] = include_bytes!("images/out-both-plus-five.png");
 
 fn load(bytes: &[u8]) -> DynamicImage {
     image::load_from_memory(bytes).expect("loaded test image")

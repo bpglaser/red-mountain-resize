@@ -116,7 +116,10 @@ impl Carver {
 
     fn get_points_removed_by_shrink(&self, distance: usize) -> Vec<(usize, usize)> {
         let mut shrinker = self.clone();
+
         shrinker.removed_points.clear();
+        shrinker.reset_positions();
+
         shrinker.shrink_distance(distance);
         let mut points = shrinker.get_removed_points();
 
@@ -124,6 +127,14 @@ impl Carver {
         points.sort_by(|a, b| b.0.cmp(&a.0));
 
         points
+    }
+
+    fn reset_positions(&mut self) {
+        for y in 0..self.grid.height() {
+            for x in 0..self.grid.width() {
+                self.grid.get_mut(x, y).original_position = (x, y);
+            }
+        }
     }
 
     fn shrink_distance(&mut self, distance: usize) {
@@ -169,7 +180,8 @@ impl Carver {
     }
 
     fn add_point(&mut self, x: usize, y: usize, pixel: Rgba<u8>) {
-        self.removed_points.push((x, y));
+        self.removed_points
+            .push(self.grid.get(x, y).original_position);
         self.grid.shift_row_right_from_point(x, y);
         *self.grid.get_mut(x + 1, y) = pixel.into();
     }
@@ -182,7 +194,8 @@ impl Carver {
 
     fn remove_path(&mut self, points: Vec<(usize, usize)>) {
         for (x, y) in points {
-            self.removed_points.push((x, y));
+            let mut original_position = self.grid.get(x, y).original_position;
+            self.removed_points.push(original_position);
             self.grid.shift_row_left_from_point(x, y);
         }
         self.grid.remove_last_column();
@@ -190,7 +203,6 @@ impl Carver {
 
     fn rotate(&mut self) {
         self.grid.rotate();
-        self.rotate_removed_points();
     }
 
     fn rotate_removed_points(&mut self) {
