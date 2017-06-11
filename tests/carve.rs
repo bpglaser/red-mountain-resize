@@ -1,9 +1,11 @@
 extern crate image;
 extern crate rmr;
 
-use image::{DynamicImage, GenericImage};
+use image::{DynamicImage, GenericImage, ImageFormat};
 
 use rmr::carve::Carver;
+
+use std::fs::File;
 
 macro_rules! test_carve {
     ( $target:expr, $dw:expr, $dh:expr ) => {
@@ -16,12 +18,12 @@ macro_rules! test_carve {
         let mut carver = Carver::new(&input);
         let output = carver.resize(target_width, target_height);
 
-        assert_eq!(target_width, output.width() as usize);
-        assert_eq!(target_height, output.height() as usize);
-
         let target = load($target);
-        assert!(target.raw_pixels() == output.raw_pixels(),
-                "Bytes of {} failed to match output", stringify!($target));
+        if let Err(msg) = compare_images(&target, &output) {
+            let filename = format!("{}.png", stringify!($target));
+            output.save(&mut File::create(&filename).unwrap(), ImageFormat::PNG).unwrap();
+            panic!("{} Saved to: {}", msg, filename);
+        }
     };
 }
 
@@ -65,4 +67,17 @@ static BOTH_PLUS_FIVE: &'static [u8; 15226] = include_bytes!("images/out-both-pl
 
 fn load(bytes: &[u8]) -> DynamicImage {
     image::load_from_memory(bytes).expect("loaded test image")
+}
+
+fn compare_images(target: &DynamicImage, image: &DynamicImage) -> Result<(), &'static str> {
+    assert_eq!(target.width(), image.width());
+    assert_eq!(target.height(), image.height());
+
+    for (x, y, pixel) in target.pixels() {
+        if pixel != image.get_pixel(x, y) {
+            return Err("Images do not match!");
+        }
+    }
+
+    Ok(())
 }

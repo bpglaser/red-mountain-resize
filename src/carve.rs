@@ -142,7 +142,11 @@ impl Carver {
             let vertical_square_gradient = up.square_gradient(down);
             horizontal_square_gradient + vertical_square_gradient
         };
-        self.grid.get_mut(x, y).energy = energy;
+
+        if self.grid.get(x, y).marked {
+            self.grid.get_mut(x, y).energy = energy;
+            self.grid.get_mut(x, y).marked = false;
+        }
     }
 
     fn calculate_path_cost(&mut self, x: usize, y: usize) {
@@ -182,6 +186,7 @@ impl Carver {
 
     fn remove_path(&mut self, points: Vec<(usize, usize)>) {
         for (x, y) in points {
+            self.grid.apply_adjacent(x, y, |pep| pep.marked = true);
             self.removed_points.push((x, y));
             self.grid.shift_row_left_from_point(x, y);
         }

@@ -66,6 +66,22 @@ impl<T> Grid<T> {
         (left, right, up, down)
     }
 
+    pub fn apply_adjacent<F>(&mut self, x: usize, y: usize, func: F)
+        where F: Fn(&mut T)
+    {
+        let x_left = if x == 0 { self.width() - 1 } else { x - 1 };
+        func(self.get_mut(x_left, y));
+
+        let x_right = if x == self.width() - 1 { 0 } else { x + 1 };
+        func(self.get_mut(x_right, y));
+
+        let y_up = if y == 0 { self.height() - 1 } else { y - 1 };
+        func(self.get_mut(x, y_up));
+
+        let y_down = if y == self.height() - 1 { 0 } else { y + 1 };
+        func(self.get_mut(x, y_down));
+    }
+
     pub fn get_parents(&self, x: usize, y: usize) -> [Option<&T>; 3] {
         let mut parents = [None; 3];
 
@@ -192,7 +208,8 @@ impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
             let mut row = vec![];
             for x in 0..width {
                 let pixel = image.get_pixel(x, y);
-                let pep = pixel.into();
+                let mut pep: PixelEnergyPoint = pixel.into();
+                pep.marked = true;
                 row.push(pep);
             }
             columns.push(row);
