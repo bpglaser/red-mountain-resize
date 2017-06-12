@@ -27,7 +27,7 @@ fn run(mut config: Config) -> BoxResult<()> {
         None
     };
 
-    let scaled_image = carver.resize(width as usize, height as usize); // TODO usize -> u32
+    let scaled_image = carver.resize(width, height);
 
     if let Some(time_start) = time_start {
         let duration = time_start.elapsed();
@@ -46,26 +46,27 @@ fn run(mut config: Config) -> BoxResult<()> {
     Ok(())
 }
 
-fn get_target_dimensions(image: &DynamicImage, config: &Config) -> (u32, u32) {
+fn get_target_dimensions(image: &DynamicImage, config: &Config) -> (usize, usize) {
     if let Some(dimensions) = config.dimensions {
         return dimensions;
     }
 
-    let (mut width, mut height) = image.dimensions();
+    let (width, height) = image.dimensions();
+    let (mut width, mut height) = (width as usize, height as usize);
 
     if let Some(delta_width) = config.width {
         if delta_width >= 0 {
-            width += delta_width as u32;
+            width += delta_width as usize;
         } else {
-            width -= delta_width.abs() as u32;
+            width -= delta_width.abs() as usize;
         }
     }
 
     if let Some(delta_height) = config.height {
         if delta_height >= 0 {
-            height += delta_height as u32;
+            height += delta_height as usize;
         } else {
-            height -= delta_height.abs() as u32;
+            height -= delta_height.abs() as usize;
         }
     }
 

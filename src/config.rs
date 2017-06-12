@@ -82,9 +82,9 @@ fn validate_extension(s: String) -> Result<(), String> {
 pub struct Config {
     pub input_path: PathBuf,
     pub output_path: Option<PathBuf>,
-    pub width: Option<i32>,
-    pub height: Option<i32>,
-    pub dimensions: Option<(u32, u32)>,
+    pub width: Option<isize>,
+    pub height: Option<isize>,
+    pub dimensions: Option<(usize, usize)>,
     pub debug_path: Option<PathBuf>,
     pub time: bool,
 }
@@ -140,7 +140,7 @@ impl Config {
            })
     }
 
-    fn parse_dimensions(mut values: Values) -> (u32, u32) {
+    fn parse_dimensions(mut values: Values) -> (usize, usize) {
         let x = values.next().and_then(|s| s.parse().ok()).expect("x value");
         let y = values.next().and_then(|s| s.parse().ok()).expect("y value");
         (x, y)
