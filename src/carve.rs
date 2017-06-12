@@ -54,29 +54,7 @@ impl Carver {
         }
     }
 
-    fn get_pixel_energy(&self) -> Vec<Vec<u32>> {
-        let mut grid = vec![];
-        for y in 0..self.grid.height() {
-            let mut row = vec![];
-            for x in 0..self.grid.width() {
-                row.push(self.grid.get(x, y).energy);
-            }
-            grid.push(row);
-        }
-        grid
-    }
 
-    fn get_path_energy(&self) -> Vec<Vec<u32>> {
-        let mut grid = vec![];
-        for y in 0..self.grid.height() {
-            let mut row = vec![];
-            for x in 0..self.grid.width() {
-                row.push(self.grid.get(x, y).path_cost);
-            }
-            grid.push(row);
-        }
-        grid
-    }
 
     fn get_path_start(&self) -> (usize, usize) {
         let y = self.grid.height() - 1;
@@ -194,7 +172,7 @@ impl Carver {
 
     fn remove_path(&mut self, points: Vec<(usize, usize)>) {
         for (x, y) in points {
-            let mut original_position = self.grid.get(x, y).original_position;
+            let original_position = self.grid.get(x, y).original_position;
             self.removed_points.push(original_position);
             self.grid.shift_row_left_from_point(x, y);
         }
@@ -205,12 +183,6 @@ impl Carver {
         self.grid.rotate();
     }
 
-    fn rotate_removed_points(&mut self) {
-        for point in self.removed_points.iter_mut() {
-            *point = (point.1, point.0);
-        }
-    }
-
     fn rebuild_image(&self) -> DynamicImage {
         let mut image = DynamicImage::new_rgba8(self.grid.width() as u32,
                                                 self.grid.height() as u32);
@@ -218,6 +190,32 @@ impl Carver {
             image.put_pixel(x as u32, y as u32, pep.pixel);
         }
         image
+    }
+
+    #[cfg(test)]
+    fn get_pixel_energy(&self) -> Vec<Vec<u32>> {
+        let mut grid = vec![];
+        for y in 0..self.grid.height() {
+            let mut row = vec![];
+            for x in 0..self.grid.width() {
+                row.push(self.grid.get(x, y).energy);
+            }
+            grid.push(row);
+        }
+        grid
+    }
+
+    #[cfg(test)]
+    fn get_path_energy(&self) -> Vec<Vec<u32>> {
+        let mut grid = vec![];
+        for y in 0..self.grid.height() {
+            let mut row = vec![];
+            for x in 0..self.grid.width() {
+                row.push(self.grid.get(x, y).path_cost);
+            }
+            grid.push(row);
+        }
+        grid
     }
 }
 
