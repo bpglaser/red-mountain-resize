@@ -54,8 +54,6 @@ impl Carver {
         }
     }
 
-
-
     fn get_path_start(&self) -> (usize, usize) {
         let y = self.grid.height() - 1;
         let (x, _) = self.grid
