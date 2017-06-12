@@ -5,11 +5,11 @@ use std::fs::File;
 use std::path::Path;
 use std::time::Instant;
 
-use image::{DynamicImage, GenericImage, ImageFormat};
+use image::{DynamicImage, GenericImage};
 
 use rmr::BoxResult;
 use rmr::carve::{Carver, create_debug_image};
-use rmr::config::{Config, parse_args};
+use rmr::config::{Config, get_format, parse_args};
 
 fn main() {
     parse_args().and_then(run).unwrap()
@@ -33,7 +33,7 @@ fn run(mut config: Config) -> BoxResult<()> {
         let duration = time_start.elapsed();
         let secs = duration.as_secs();
         let nanos = duration.subsec_nanos();
-        println!("Resing image took: {}.{}", secs, nanos);
+        println!("Resizing image took: {}.{}", secs, nanos);
     }
 
     save_image_to_path(&scaled_image, config.get_output_path())?;
@@ -73,7 +73,8 @@ fn get_target_dimensions(image: &DynamicImage, config: &Config) -> (u32, u32) {
 }
 
 fn save_image_to_path<P: AsRef<Path>>(image: &DynamicImage, path: P) -> BoxResult<()> {
-    let mut file = File::create(path)?;
-    image.save(&mut file, ImageFormat::PNG)?;
+    let mut file = File::create(&path)?;
+    let format = get_format(&path).expect("valid save format");
+    image.save(&mut file, format)?;
     Ok(())
 }
