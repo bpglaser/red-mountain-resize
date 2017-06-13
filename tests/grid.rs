@@ -308,6 +308,52 @@ fn grid_add_last_column_test() {
     assert_eq!(&8, grid.get(3, 2));
 }
 
+#[test]
+fn grid_token_trade_test() {
+    let mut grid = make_test_grid();
+    let mut tokens = vec![];
+    for y in 0..grid.height() {
+        for x in 0..grid.width() {
+            tokens.push(grid.make_token(x, y));
+        }
+    }
+
+    let mut iter = tokens.into_iter();
+    assert_eq!(&0, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&1, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&2, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&3, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&4, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&5, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&6, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&7, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&8, grid.trade(iter.next().unwrap()).unwrap());
+    assert!(iter.next().is_none());
+}
+
+#[test]
+fn grid_token_trade_mut_test() {
+    let mut grid = make_test_grid();
+    let mut tokens = vec![];
+    for y in 0..grid.height() {
+        for x in 0..grid.width() {
+            tokens.push(grid.make_token(x, y));
+        }
+    }
+
+    let mut iter = tokens.into_iter();
+    assert_eq!(&mut 0, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 1, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 2, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 3, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 4, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 5, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 6, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 7, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 8, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert!(iter.next().is_none());
+}
+
 // Rotated test grid visualized:
 //  -----------
 // | 0 | 3 | 6 |
@@ -490,6 +536,108 @@ fn grid_rotation_add_last_column_test() {
     assert_eq!(&5, grid.get(1, 2));
     assert_eq!(&8, grid.get(2, 2));
     assert_eq!(&8, grid.get(3, 2));
+}
+
+#[test]
+fn grid_rotation_before_token_trade_test() {
+    let mut grid = make_test_grid();
+    grid.rotate();
+
+    let mut tokens = vec![];
+    for y in 0..grid.height() {
+        for x in 0..grid.width() {
+            tokens.push(grid.make_token(x, y));
+        }
+    }
+
+    let mut iter = tokens.into_iter();
+    assert_eq!(&0, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&3, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&6, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&1, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&4, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&7, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&2, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&5, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&8, grid.trade(iter.next().unwrap()).unwrap());
+    assert!(iter.next().is_none());
+}
+
+#[test]
+fn grid_rotation_after_token_trade_test() {
+    let mut grid = make_test_grid();
+
+    let mut tokens = vec![];
+    for y in 0..grid.height() {
+        for x in 0..grid.width() {
+            tokens.push(grid.make_token(x, y));
+        }
+    }
+
+    grid.rotate();
+
+    let mut iter = tokens.into_iter();
+    assert_eq!(&0, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&1, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&2, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&3, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&4, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&5, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&6, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&7, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&8, grid.trade(iter.next().unwrap()).unwrap());
+    assert!(iter.next().is_none());
+}
+
+#[test]
+fn grid_rotation_after_token_trade_mut_test() {
+    let mut grid = make_test_grid();
+
+    let mut tokens = vec![];
+    for y in 0..grid.height() {
+        for x in 0..grid.width() {
+            tokens.push(grid.make_token(x, y));
+        }
+    }
+
+    grid.rotate();
+
+    let mut iter = tokens.into_iter();
+    assert_eq!(&mut 0, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 1, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 2, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 3, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 4, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 5, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 6, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 7, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 8, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert!(iter.next().is_none());
+}
+
+#[test]
+fn grid_rotation_before_token_trade_mut_test() {
+    let mut grid = make_test_grid();
+    grid.rotate();
+
+    let mut tokens = vec![];
+    for y in 0..grid.height() {
+        for x in 0..grid.width() {
+            tokens.push(grid.make_token(x, y));
+        }
+    }
+
+    let mut iter = tokens.into_iter();
+    assert_eq!(&mut 0, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 3, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 6, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 1, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 4, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 7, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 2, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 5, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert_eq!(&mut 8, grid.trade_mut(iter.next().unwrap()).unwrap());
+    assert!(iter.next().is_none());
 }
 
 fn make_test_grid() -> Grid<isize> {

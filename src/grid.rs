@@ -189,27 +189,28 @@ impl<T> Grid<T> {
         }
     }
 
-    pub fn make_token(&mut self, x: usize, y: usize) -> Token {
+    pub fn make_token(&mut self, mut x: usize, mut y: usize) -> Token {
+        if self.is_rotated() {
+            let tmp = x;
+            x = y;
+            y = tmp;
+        }
         let master = Rc::new(Cell::new((x, y)));
         let position = Rc::downgrade(&master);
         *self.get_strong_position(x, y) = Some(master);
         Token { position }
     }
 
-    pub fn trade(&self, token: &Token) -> Option<&T> {
-        token.try_get().map(|(x, y)| self.get(x, y))
+    pub fn trade(&self, token: Token) -> Option<&T> {
+        token.try_get().map(|(x, y)| &self.points[y][x].0)
     }
 
-    pub fn trade_mut(&mut self, token: &Token) -> Option<&mut T> {
-        token.try_get().map(move |(x, y)| self.get_mut(x, y))
+    pub fn trade_mut(&mut self, token: Token) -> Option<&mut T> {
+        token.try_get().map(move |(x, y)| &mut self.points[y][x].0)
     }
 
     fn get_strong_position(&mut self, x: usize, y: usize) -> &mut Option<StrongPosition> {
-        if !self.is_rotated() {
-            &mut self.points[y][x].1
-        } else {
-            &mut self.points[x][y].1
-        }
+        &mut self.points[y][x].1
     }
 
     fn convert_container(points: Vec<Vec<T>>) -> Vec<Vec<(T, Option<StrongPosition>)>> {
