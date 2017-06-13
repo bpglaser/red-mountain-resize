@@ -5,11 +5,11 @@ use std::fs::File;
 use std::path::Path;
 use std::time::Instant;
 
-use image::{DynamicImage, GenericImage, ImageFormat};
+use image::{DynamicImage, GenericImage};
 
 use rmr::BoxResult;
 use rmr::carve::{Carver, create_debug_image};
-use rmr::config::{Config, parse_args};
+use rmr::config::{Config, get_format, parse_args};
 
 fn main() {
     parse_args().and_then(run).unwrap()
@@ -27,13 +27,13 @@ fn run(mut config: Config) -> BoxResult<()> {
         None
     };
 
-    let scaled_image = carver.resize(width as usize, height as usize); // TODO usize -> u32
+    let scaled_image = carver.resize(width, height);
 
     if let Some(time_start) = time_start {
         let duration = time_start.elapsed();
         let secs = duration.as_secs();
         let nanos = duration.subsec_nanos();
-        println!("Resing image took: {}.{}", secs, nanos);
+        println!("Resizing image took: {}.{}", secs, nanos);
     }
 
     save_image_to_path(&scaled_image, config.get_output_path())?;
@@ -46,26 +46,27 @@ fn run(mut config: Config) -> BoxResult<()> {
     Ok(())
 }
 
-fn get_target_dimensions(image: &DynamicImage, config: &Config) -> (u32, u32) {
+fn get_target_dimensions(image: &DynamicImage, config: &Config) -> (usize, usize) {
     if let Some(dimensions) = config.dimensions {
         return dimensions;
     }
 
-    let (mut width, mut height) = image.dimensions();
+    let (width, height) = image.dimensions();
+    let (mut width, mut height) = (width as usize, height as usize);
 
     if let Some(delta_width) = config.width {
         if delta_width >= 0 {
-            width += delta_width as u32;
+            width += delta_width as usize;
         } else {
-            width -= delta_width.abs() as u32;
+            width -= delta_width.abs() as usize;
         }
     }
 
     if let Some(delta_height) = config.height {
         if delta_height >= 0 {
-            height += delta_height as u32;
+            height += delta_height as usize;
         } else {
-            height -= delta_height.abs() as u32;
+            height -= delta_height.abs() as usize;
         }
     }
 
@@ -73,7 +74,8 @@ fn get_target_dimensions(image: &DynamicImage, config: &Config) -> (u32, u32) {
 }
 
 fn save_image_to_path<P: AsRef<Path>>(image: &DynamicImage, path: P) -> BoxResult<()> {
-    let mut file = File::create(path)?;
-    image.save(&mut file, ImageFormat::PNG)?;
+    let mut file = File::create(&path)?;
+    let format = get_format(&path).expect("valid save format");
+    image.save(&mut file, format)?;
     Ok(())
 }

@@ -210,6 +210,7 @@ impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
                 let pixel = image.get_pixel(x, y);
                 let mut pep: PixelEnergyPoint = pixel.into();
                 pep.marked = true;
+                pep.original_position = (x as usize, y as usize);
                 row.push(pep);
             }
             columns.push(row);

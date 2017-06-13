@@ -54,30 +54,6 @@ impl Carver {
         }
     }
 
-    fn get_pixel_energy(&self) -> Vec<Vec<u32>> {
-        let mut grid = vec![];
-        for y in 0..self.grid.height() {
-            let mut row = vec![];
-            for x in 0..self.grid.width() {
-                row.push(self.grid.get(x, y).energy);
-            }
-            grid.push(row);
-        }
-        grid
-    }
-
-    fn get_path_energy(&self) -> Vec<Vec<u32>> {
-        let mut grid = vec![];
-        for y in 0..self.grid.height() {
-            let mut row = vec![];
-            for x in 0..self.grid.width() {
-                row.push(self.grid.get(x, y).path_cost);
-            }
-            grid.push(row);
-        }
-        grid
-    }
-
     fn get_path_start(&self) -> (usize, usize) {
         let y = self.grid.height() - 1;
         let (x, _) = self.grid
@@ -116,7 +92,10 @@ impl Carver {
 
     fn get_points_removed_by_shrink(&self, distance: usize) -> Vec<(usize, usize)> {
         let mut shrinker = self.clone();
+
         shrinker.removed_points.clear();
+        shrinker.reset_positions();
+
         shrinker.shrink_distance(distance);
         let mut points = shrinker.get_removed_points();
 
@@ -124,6 +103,14 @@ impl Carver {
         points.sort_by(|a, b| b.0.cmp(&a.0));
 
         points
+    }
+
+    fn reset_positions(&mut self) {
+        for y in 0..self.grid.height() {
+            for x in 0..self.grid.width() {
+                self.grid.get_mut(x, y).original_position = (x, y);
+            }
+        }
     }
 
     fn shrink_distance(&mut self, distance: usize) {
@@ -173,7 +160,8 @@ impl Carver {
     }
 
     fn add_point(&mut self, x: usize, y: usize, pixel: Rgba<u8>) {
-        self.removed_points.push((x, y));
+        self.removed_points
+            .push(self.grid.get(x, y).original_position);
         self.grid.shift_row_right_from_point(x, y);
         *self.grid.get_mut(x + 1, y) = pixel.into();
     }
@@ -187,7 +175,8 @@ impl Carver {
     fn remove_path(&mut self, points: Vec<(usize, usize)>) {
         for (x, y) in points {
             self.grid.apply_adjacent(x, y, |pep| pep.marked = true);
-            self.removed_points.push((x, y));
+            let original_position = self.grid.get(x, y).original_position;
+            self.removed_points.push(original_position);
             self.grid.shift_row_left_from_point(x, y);
         }
         self.grid.remove_last_column();
@@ -195,13 +184,6 @@ impl Carver {
 
     fn rotate(&mut self) {
         self.grid.rotate();
-        self.rotate_removed_points();
-    }
-
-    fn rotate_removed_points(&mut self) {
-        for point in self.removed_points.iter_mut() {
-            *point = (point.1, point.0);
-        }
     }
 
     fn rebuild_image(&self) -> DynamicImage {
@@ -211,6 +193,32 @@ impl Carver {
             image.put_pixel(x as u32, y as u32, pep.pixel);
         }
         image
+    }
+
+    #[cfg(test)]
+    fn get_pixel_energy(&self) -> Vec<Vec<u32>> {
+        let mut grid = vec![];
+        for y in 0..self.grid.height() {
+            let mut row = vec![];
+            for x in 0..self.grid.width() {
+                row.push(self.grid.get(x, y).energy);
+            }
+            grid.push(row);
+        }
+        grid
+    }
+
+    #[cfg(test)]
+    fn get_path_energy(&self) -> Vec<Vec<u32>> {
+        let mut grid = vec![];
+        for y in 0..self.grid.height() {
+            let mut row = vec![];
+            for x in 0..self.grid.width() {
+                row.push(self.grid.get(x, y).path_cost);
+            }
+            grid.push(row);
+        }
+        grid
     }
 }
 

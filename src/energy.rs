@@ -8,6 +8,7 @@ pub struct PixelEnergyPoint {
     pub energy: u32,
     pub path_cost: u32,
     pub marked: bool,
+    pub original_position: (usize, usize),
 }
 
 impl PixelEnergyPoint {
@@ -60,6 +61,7 @@ impl From<Rgba<u8>> for PixelEnergyPoint {
             energy: 0,
             path_cost: 0,
             marked: false,
+            original_position: (0, 0),
         }
     }
 }
