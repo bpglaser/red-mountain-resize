@@ -1,15 +1,33 @@
+use std::cell::Cell;
+use std::rc::{Rc, Weak};
+
 use image::{DynamicImage, GenericImage};
 
 use energy::PixelEnergyPoint;
 
+type StrongPosition = Rc<Cell<(usize, usize)>>;
+type WeakPosition = Weak<Cell<(usize, usize)>>;
+
+#[derive(Clone)]
+pub struct Token {
+    position: WeakPosition,
+}
+
+impl Token {
+    fn try_get(&self) -> Option<(usize, usize)> {
+        self.position.upgrade().map(|p| p.get())
+    }
+}
+
 #[derive(Clone)]
 pub struct Grid<T> {
-    points: Vec<Vec<T>>,
+    points: Vec<Vec<(T, Option<StrongPosition>)>>,
     rotated: bool,
 }
 
 impl<T> Grid<T> {
     pub fn new(points: Vec<Vec<T>>) -> Self {
+        let points = Grid::convert_container(points);
         let rotated = false;
         Self { points, rotated }
     }
@@ -32,9 +50,9 @@ impl<T> Grid<T> {
 
     pub fn get(&self, x: usize, y: usize) -> &T {
         if !self.rotated {
-            &self.points[y][x]
+            &self.points[y][x].0
         } else {
-            &self.points[x][y]
+            &self.points[x][y].0
         }
     }
 
@@ -138,9 +156,9 @@ impl<T> Grid<T> {
 
     pub fn get_mut(&mut self, x: usize, y: usize) -> &mut T {
         if !self.rotated {
-            &mut self.points[y][x]
+            &mut self.points[y][x].0
         } else {
-            &mut self.points[x][y]
+            &mut self.points[x][y].0
         }
     }
 
@@ -169,6 +187,36 @@ impl<T> Grid<T> {
                 row.pop().expect(expect_msg);
             }
         }
+    }
+
+    pub fn make_token(&mut self, x: usize, y: usize) -> Token {
+        let master = Rc::new(Cell::new((x, y)));
+        let position = Rc::downgrade(&master);
+        *self.get_strong_position(x, y) = Some(master);
+        Token { position }
+    }
+
+    pub fn trade(&self, token: &Token) -> Option<&T> {
+        token.try_get().map(|(x, y)| self.get(x, y))
+    }
+
+    pub fn trade_mut(&mut self, token: &Token) -> Option<&mut T> {
+        token.try_get().map(move |(x, y)| self.get_mut(x, y))
+    }
+
+    fn get_strong_position(&mut self, x: usize, y: usize) -> &mut Option<StrongPosition> {
+        if !self.is_rotated() {
+            &mut self.points[y][x].1
+        } else {
+            &mut self.points[x][y].1
+        }
+    }
+
+    fn convert_container(points: Vec<Vec<T>>) -> Vec<Vec<(T, Option<StrongPosition>)>> {
+        points
+            .into_iter()
+            .map(|row| row.into_iter().map(|item| (item, None)).collect())
+            .collect()
     }
 }
 
@@ -203,7 +251,7 @@ impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
     fn from(image: &'a DynamicImage) -> Self {
         let (width, height) = image.dimensions();
 
-        let mut columns = vec![];
+        let mut rows = vec![];
         for y in 0..height {
             let mut row = vec![];
             for x in 0..width {
@@ -213,10 +261,10 @@ impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
                 pep.original_position = (x as usize, y as usize);
                 row.push(pep);
             }
-            columns.push(row);
+            rows.push(row);
         }
 
-        Grid::new(columns)
+        Grid::new(rows)
     }
 }
 
