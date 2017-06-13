@@ -2,7 +2,7 @@ use image::{Pixel, Rgba};
 
 use num_traits::ToPrimitive;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PixelEnergyPoint {
     pub pixel: Rgba<u8>,
     pub energy: u32,
