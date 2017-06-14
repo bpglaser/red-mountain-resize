@@ -19,7 +19,6 @@ impl Token {
     }
 }
 
-#[derive(Clone)]
 pub struct Grid<T> {
     points: Vec<Vec<(T, Option<StrongPosition>)>>,
     rotated: bool,
@@ -244,6 +243,28 @@ impl<T: Clone> Grid<T> {
                 let clone = row.last().expect(expect_msg).clone();
                 row.push(clone);
             }
+        }
+    }
+
+    fn clone_points_without_positions(&self) -> Vec<Vec<(T, Option<StrongPosition>)>> {
+        let mut rows = vec![];
+        for row in &self.points {
+            let new_row = row.iter()
+                .map(|&(ref item, _)| (item.clone(), None))
+                .collect();
+            rows.push(new_row);
+        }
+        rows
+    }
+}
+
+// Manually implementing clone prevents cloned grids from updating their
+// parent's tokens via Rc's that would otherwise get cloned too.
+impl<T: Clone> Clone for Grid<T> {
+    fn clone(&self) -> Self {
+        Self {
+            points: self.clone_points_without_positions(),
+            rotated: self.rotated,
         }
     }
 }
