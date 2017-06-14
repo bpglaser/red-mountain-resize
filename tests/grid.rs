@@ -354,6 +354,31 @@ fn grid_token_trade_mut_test() {
     assert!(iter.next().is_none());
 }
 
+#[test]
+fn grid_token_shift_row_left_from_point_test() {
+    let mut grid = make_test_grid();
+    let mut tokens = vec![];
+    for y in 0..grid.height() {
+        for x in 0..grid.width() {
+            tokens.push(grid.make_token(x, y));
+        }
+    }
+
+    grid.shift_row_left_from_point(0, 0);
+
+    let mut iter = tokens.into_iter();
+    assert!(grid.trade(iter.next().unwrap()).is_none());
+    assert_eq!(&1, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&2, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&3, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&4, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&5, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&6, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&7, grid.trade(iter.next().unwrap()).unwrap());
+    assert_eq!(&8, grid.trade(iter.next().unwrap()).unwrap());
+    assert!(iter.next().is_none());
+}
+
 // Rotated test grid visualized:
 //  -----------
 // | 0 | 3 | 6 |

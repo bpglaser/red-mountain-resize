@@ -14,11 +14,12 @@ pub struct Token {
 }
 
 impl Token {
-    fn try_get(&self) -> Option<(usize, usize)> {
+    fn try_get(self) -> Option<(usize, usize)> {
         self.position.upgrade().map(|p| p.get())
     }
 }
 
+#[derive(Debug)]
 pub struct Grid<T> {
     points: Vec<Vec<(T, Option<StrongPosition>)>>,
     rotated: bool,
@@ -218,12 +219,32 @@ impl<T> Grid<T> {
             .map(|row| row.into_iter().map(|item| (item, None)).collect())
             .collect()
     }
+
+    fn get_internal(&self, x: usize, y: usize) -> &(T, Option<StrongPosition>) {
+        if !self.is_rotated() {
+            &self.points[y][x]
+        } else {
+            &self.points[x][y]
+        }
+    }
+
+    fn get_mut_internal(&mut self, x: usize, y: usize) -> &mut (T, Option<StrongPosition>) {
+        if !self.rotated {
+            &mut self.points[y][x]
+        } else {
+            &mut self.points[x][y]
+        }
+    }
 }
 
 impl<T: Clone> Grid<T> {
     pub fn shift_row_left_from_point(&mut self, x: usize, y: usize) {
         for x in x..(self.width() - 1) {
-            *self.get_mut(x, y) = self.get(x + 1, y).clone();
+            let mut clone = self.get_internal(x + 1, y).clone();
+            if let Some(ref mut pos) = clone.1 {
+                pos.set((x, y));
+            }
+            *self.get_mut_internal(x, y) = clone;
         }
     }
 
