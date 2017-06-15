@@ -14,18 +14,36 @@ pub struct Token {
 }
 
 impl Token {
-    fn consume(self) -> Option<(usize, usize)> {
-        self.position.upgrade().map(|p| p.get())
-    }
-
-    fn peek(&self) -> Option<(usize, usize)> {
+    fn try_get(&self) -> Option<(usize, usize)> {
         self.position.upgrade().map(|p| p.get())
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone)]
+struct Item<T> {
+    val: T,
+    pos: Option<StrongPosition>,
+}
+
+impl<T> Item<T> {
+    fn update_pos(&mut self, x: usize, y: usize) {
+        if let Some(ref mut pos) = self.pos {
+            pos.set((x, y));
+        }
+    }
+}
+
+impl<T: Clone> Item<T> {
+    fn clone_unindexed(&self) -> Item<T> {
+        Item {
+            val: self.val.clone(),
+            pos: None,
+        }
+    }
+}
+
 pub struct Grid<T> {
-    points: Vec<Vec<(T, Option<StrongPosition>)>>,
+    points: Vec<Vec<Item<T>>>,
     rotated: bool,
 }
 
@@ -54,9 +72,9 @@ impl<T> Grid<T> {
 
     pub fn get(&self, x: usize, y: usize) -> &T {
         if !self.rotated {
-            &self.points[y][x].0
+            &self.points[y][x].val
         } else {
-            &self.points[x][y].0
+            &self.points[x][y].val
         }
     }
 
@@ -160,9 +178,9 @@ impl<T> Grid<T> {
 
     pub fn get_mut(&mut self, x: usize, y: usize) -> &mut T {
         if !self.rotated {
-            &mut self.points[y][x].0
+            &mut self.points[y][x].val
         } else {
-            &mut self.points[x][y].0
+            &mut self.points[x][y].val
         }
     }
 
@@ -222,16 +240,18 @@ impl<T> Grid<T> {
     }
 
     pub fn trade(&self, token: Token) -> Option<&T> {
-        token.consume().map(|(x, y)| &self.points[y][x].0)
+        token.try_get().map(|(x, y)| &self.points[y][x].val)
     }
 
     pub fn trade_mut(&mut self, token: Token) -> Option<&mut T> {
-        token.consume().map(move |(x, y)| &mut self.points[y][x].0)
+        token
+            .try_get()
+            .map(move |(x, y)| &mut self.points[y][x].val)
     }
 
     pub fn get_token_adjacent(&self, token: &Token) -> Option<(&T, &T, &T, &T)> {
         token
-            .peek()
+            .try_get()
             .map(|point| self.rotate_point(point))
             .map(|(x, y)| self.get_adjacent(x, y))
     }
@@ -245,17 +265,17 @@ impl<T> Grid<T> {
     }
 
     fn get_strong_position(&mut self, x: usize, y: usize) -> &mut Option<StrongPosition> {
-        &mut self.points[y][x].1
+        &mut self.points[y][x].pos
     }
 
-    fn convert_container(points: Vec<Vec<T>>) -> Vec<Vec<(T, Option<StrongPosition>)>> {
+    fn convert_container(points: Vec<Vec<T>>) -> Vec<Vec<Item<T>>> {
         points
             .into_iter()
-            .map(|row| row.into_iter().map(|item| (item, None)).collect())
+            .map(|row| row.into_iter().map(|val| Item { val, pos: None }).collect())
             .collect()
     }
 
-    fn get_internal(&self, x: usize, y: usize) -> &(T, Option<StrongPosition>) {
+    fn get_internal(&self, x: usize, y: usize) -> &Item<T> {
         if !self.is_rotated() {
             &self.points[y][x]
         } else {
@@ -263,7 +283,7 @@ impl<T> Grid<T> {
         }
     }
 
-    fn get_mut_internal(&mut self, x: usize, y: usize) -> &mut (T, Option<StrongPosition>) {
+    fn get_mut_internal(&mut self, x: usize, y: usize) -> &mut Item<T> {
         if !self.rotated {
             &mut self.points[y][x]
         } else {
@@ -276,12 +296,10 @@ impl<T: Clone> Grid<T> {
     pub fn shift_row_left_from_point(&mut self, x: usize, y: usize) {
         for x in x..(self.width() - 1) {
             let mut clone = self.get_internal(x + 1, y).clone();
-            if let Some(ref mut pos) = clone.1 {
-                if !self.is_rotated() {
-                    pos.set((x, y));
-                } else {
-                    pos.set((y, x));
-                }
+            if !self.is_rotated() {
+                clone.update_pos(x, y);
+            } else {
+                clone.update_pos(y, x);
             }
             *self.get_mut_internal(x, y) = clone;
         }
@@ -290,18 +308,15 @@ impl<T: Clone> Grid<T> {
     pub fn shift_row_right_from_point(&mut self, x: usize, y: usize) {
         for x in (x + 1..self.width()).rev() {
             let mut clone = self.get_internal(x - 1, y).clone();
-            if let Some(ref mut pos) = clone.1 {
-                if !self.is_rotated() {
-                    pos.set((x, y));
-                } else {
-                    pos.set((y, x));
-                }
+            if !self.is_rotated() {
+                clone.update_pos(x, y);
+            } else {
+                clone.update_pos(y, x);
             }
             *self.get_mut_internal(x, y) = clone;
         }
     }
 
-    // TODO handle tokens?
     pub fn add_last_column(&mut self) {
         let expect_msg = "Attempted to get last from empty grid";
         if self.rotated {
@@ -315,12 +330,10 @@ impl<T: Clone> Grid<T> {
         }
     }
 
-    fn clone_points_without_positions(&self) -> Vec<Vec<(T, Option<StrongPosition>)>> {
+    fn clone_points_without_positions(&self) -> Vec<Vec<Item<T>>> {
         let mut rows = vec![];
         for row in &self.points {
-            let new_row = row.iter()
-                .map(|&(ref item, _)| (item.clone(), None))
-                .collect();
+            let new_row = row.iter().map(|ref item| item.clone_unindexed()).collect();
             rows.push(new_row);
         }
         rows
