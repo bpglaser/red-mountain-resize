@@ -14,7 +14,11 @@ pub struct Token {
 }
 
 impl Token {
-    fn try_get(self) -> Option<(usize, usize)> {
+    fn consume(self) -> Option<(usize, usize)> {
+        self.position.upgrade().map(|p| p.get())
+    }
+
+    fn peek(&self) -> Option<(usize, usize)> {
         self.position.upgrade().map(|p| p.get())
     }
 }
@@ -201,12 +205,43 @@ impl<T> Grid<T> {
         Token { position }
     }
 
+    pub fn make_adjacent_tokens(&mut self, x: usize, y: usize) -> [Token; 4] {
+        let x_left = if x == 0 { self.width() - 1 } else { x - 1 };
+        let left = self.make_token(x_left, y);
+
+        let x_right = if x == self.width() - 1 { 0 } else { x + 1 };
+        let right = self.make_token(x_right, y);
+
+        let y_up = if y == 0 { self.height() - 1 } else { y - 1 };
+        let up = self.make_token(x, y_up);
+
+        let y_down = if y == self.height() - 1 { 0 } else { y + 1 };
+        let down = self.make_token(x, y_down);
+
+        [left, right, up, down]
+    }
+
     pub fn trade(&self, token: Token) -> Option<&T> {
-        token.try_get().map(|(x, y)| &self.points[y][x].0)
+        token.consume().map(|(x, y)| &self.points[y][x].0)
     }
 
     pub fn trade_mut(&mut self, token: Token) -> Option<&mut T> {
-        token.try_get().map(move |(x, y)| &mut self.points[y][x].0)
+        token.consume().map(move |(x, y)| &mut self.points[y][x].0)
+    }
+
+    pub fn get_token_adjacent(&self, token: &Token) -> Option<(&T, &T, &T, &T)> {
+        token
+            .peek()
+            .map(|point| self.rotate_point(point))
+            .map(|(x, y)| self.get_adjacent(x, y))
+    }
+
+    fn rotate_point(&self, point: (usize, usize)) -> (usize, usize) {
+        if !self.is_rotated() {
+            point
+        } else {
+            (point.1, point.0)
+        }
     }
 
     fn get_strong_position(&mut self, x: usize, y: usize) -> &mut Option<StrongPosition> {
@@ -313,7 +348,6 @@ impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
             for x in 0..width {
                 let pixel = image.get_pixel(x, y);
                 let mut pep: PixelEnergyPoint = pixel.into();
-                pep.marked = true;
                 pep.original_position = (x as usize, y as usize);
                 row.push(pep);
             }
