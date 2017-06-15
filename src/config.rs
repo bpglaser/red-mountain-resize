@@ -169,5 +169,8 @@ pub fn get_format<P: AsRef<Path>>(path: P) -> Result<ImageFormat, String> {
 }
 
 fn get_extension<P: AsRef<Path>>(path: P) -> Option<String> {
-    path.as_ref().to_str().map(|s| s.to_lowercase())
+    path.as_ref()
+        .extension()
+        .and_then(|s| s.to_str())
+        .map(|s| s.to_lowercase())
 }
