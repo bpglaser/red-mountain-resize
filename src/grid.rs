@@ -242,7 +242,11 @@ impl<T: Clone> Grid<T> {
         for x in x..(self.width() - 1) {
             let mut clone = self.get_internal(x + 1, y).clone();
             if let Some(ref mut pos) = clone.1 {
-                pos.set((x, y));
+                if !self.is_rotated() {
+                    pos.set((x, y));
+                } else {
+                    pos.set((y, x));
+                }
             }
             *self.get_mut_internal(x, y) = clone;
         }
@@ -250,10 +254,19 @@ impl<T: Clone> Grid<T> {
 
     pub fn shift_row_right_from_point(&mut self, x: usize, y: usize) {
         for x in (x + 1..self.width()).rev() {
-            *self.get_mut(x, y) = self.get(x - 1, y).clone();
+            let mut clone = self.get_internal(x - 1, y).clone();
+            if let Some(ref mut pos) = clone.1 {
+                if !self.is_rotated() {
+                    pos.set((x, y));
+                } else {
+                    pos.set((y, x));
+                }
+            }
+            *self.get_mut_internal(x, y) = clone;
         }
     }
 
+    // TODO handle tokens?
     pub fn add_last_column(&mut self) {
         let expect_msg = "Attempted to get last from empty grid";
         if self.rotated {
