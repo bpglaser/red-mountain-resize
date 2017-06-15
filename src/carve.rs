@@ -27,11 +27,18 @@ impl Carver {
         let initial_height = self.grid.height();
 
         self.calculate_all_pixel_energy();
+        let mut width_changed = false;
 
         if width > initial_width {
             self.grow_distance(width - initial_width);
+            width_changed = true;
         } else if width < initial_width {
             self.shrink_distance(initial_width - width);
+            width_changed = true;
+        }
+
+        if width_changed {
+            self.calculate_all_pixel_energy();
         }
 
         if height > initial_height {
