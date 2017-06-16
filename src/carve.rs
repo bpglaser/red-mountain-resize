@@ -37,7 +37,7 @@ impl Carver {
             width_changed = true;
         }
 
-        if width_changed {
+        if width_changed && height != initial_height {
             self.calculate_all_pixel_energy();
         }
 
