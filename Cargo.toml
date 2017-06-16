@@ -10,4 +10,4 @@ doc = false
 [dependencies]
 clap = "2.24.2"
 image = "0.12.4"
-num-traits = "0.1.37"
+num-traits = "0.1.39"
