@@ -2,7 +2,7 @@ use std::mem;
 
 use image::{DynamicImage, GenericImage, Rgba};
 
-use energy::PixelEnergyPoint;
+use energy::{PixelEnergyPoint, average_pixels};
 use grid::{Grid, Token};
 
 #[derive(Clone)]
@@ -42,13 +42,13 @@ impl Carver {
         }
 
         if height > initial_height {
-            self.rotate();
+            self.grid.rotate();
             self.grow_distance(height - initial_height);
-            self.rotate();
+            self.grid.rotate();
         } else if height < initial_height {
-            self.rotate();
+            self.grid.rotate();
             self.shrink_distance(initial_height - height);
-            self.rotate();
+            self.grid.rotate();
         }
 
         self.rebuild_image()
@@ -56,6 +56,29 @@ impl Carver {
 
     pub fn get_removed_points(&self) -> Vec<(usize, usize)> {
         self.removed_points.clone()
+    }
+
+    fn shrink_distance(&mut self, distance: usize) {
+        for _ in 0..distance {
+            self.calculate_energy();
+            let (start_x, start_y) = self.get_path_start();
+            let path = self.find_path(start_x, start_y);
+            self.remove_path(path);
+        }
+    }
+
+    fn grow_distance(&mut self, distance: usize) {
+        let points = self.get_points_removed_by_shrink(distance);
+
+        for _ in 0..distance {
+            self.grid.add_last_column();
+        }
+
+        for (x, y) in points {
+            let left = self.grid.get(x, y).pixel;
+            let pixel = self.average_pixel_from_neighbors(x, y, left);
+            self.add_point(x, y, pixel)
+        }
     }
 
     fn calculate_energy(&mut self) {
@@ -81,6 +104,23 @@ impl Carver {
         }
     }
 
+    fn calculate_pixel_energy(&mut self, x: usize, y: usize) {
+        let energy = {
+            let (left, right, up, down) = self.grid.get_adjacent(x, y);
+            let horizontal_square_gradient = left.square_gradient(right);
+            let vertical_square_gradient = up.square_gradient(down);
+            horizontal_square_gradient + vertical_square_gradient
+        };
+
+        self.grid.get_mut(x, y).energy = energy;
+    }
+
+    fn calculate_path_cost(&mut self, x: usize, y: usize) {
+        let min_parent_path_cost = self.get_min_parent_path_cost(x, y);
+        let energy = self.grid.get(x, y).energy;
+        self.grid.get_mut(x, y).path_cost = min_parent_path_cost + energy;
+    }
+
     fn get_path_start(&self) -> (usize, usize) {
         let y = self.grid.height() - 1;
         let (x, _) = self.grid
@@ -100,20 +140,6 @@ impl Carver {
                 None => return path,
                 Some(parent) => path.push(parent),
             }
-        }
-    }
-
-    fn grow_distance(&mut self, distance: usize) {
-        let points = self.get_points_removed_by_shrink(distance);
-
-        for _ in 0..distance {
-            self.grid.add_last_column();
-        }
-
-        for (x, y) in points {
-            let left = self.grid.get(x, y).pixel;
-            let pixel = self.average_pixel_from_neighbors(x, y, left);
-            self.add_point(x, y, pixel)
         }
     }
 
@@ -141,26 +167,6 @@ impl Carver {
         }
     }
 
-    fn shrink_distance(&mut self, distance: usize) {
-        for _ in 0..distance {
-            self.calculate_energy();
-            let (start_x, start_y) = self.get_path_start();
-            let path = self.find_path(start_x, start_y);
-            self.remove_path(path);
-        }
-    }
-
-    fn calculate_pixel_energy(&mut self, x: usize, y: usize) {
-        let energy = {
-            let (left, right, up, down) = self.grid.get_adjacent(x, y);
-            let horizontal_square_gradient = left.square_gradient(right);
-            let vertical_square_gradient = up.square_gradient(down);
-            horizontal_square_gradient + vertical_square_gradient
-        };
-
-        self.grid.get_mut(x, y).energy = energy;
-    }
-
     fn calculate_pixel_energy_from_token(&mut self, token: Token) {
         let energy = match self.grid.get_token_adjacent(&token) {
             None => return,
@@ -175,12 +181,6 @@ impl Carver {
             .trade_mut(token)
             .expect("token should still be valid")
             .energy = energy;
-    }
-
-    fn calculate_path_cost(&mut self, x: usize, y: usize) {
-        let min_parent_path_cost = self.get_min_parent_path_cost(x, y);
-        let energy = self.grid.get(x, y).energy;
-        self.grid.get_mut(x, y).path_cost = min_parent_path_cost + energy;
     }
 
     fn get_min_parent_path_cost(&self, x: usize, y: usize) -> u32 {
@@ -225,10 +225,6 @@ impl Carver {
         self.grid.remove_last_column();
     }
 
-    fn rotate(&mut self) {
-        self.grid.rotate();
-    }
-
     fn rebuild_image(&self) -> DynamicImage {
         let mut image = DynamicImage::new_rgba8(self.grid.width() as u32,
                                                 self.grid.height() as u32);
@@ -263,22 +259,6 @@ impl Carver {
         }
         grid
     }
-}
-
-fn average_pixels(pixel1: &[u8; 4], pixel2: &[u8; 4]) -> [u8; 4] {
-    [((pixel1[0] as u16 + pixel2[0] as u16) / 2) as u8,
-     ((pixel1[1] as u16 + pixel2[1] as u16) / 2) as u8,
-     ((pixel1[2] as u16 + pixel2[2] as u16) / 2) as u8,
-     ((pixel1[3] as u16 + pixel2[3] as u16) / 2) as u8]
-}
-
-pub fn create_debug_image(image: &DynamicImage, points: &[(usize, usize)]) -> DynamicImage {
-    let red_pixel = Rgba { data: [255, 0, 0, 255] };
-    let mut image = image.clone();
-    for &(x, y) in points {
-        image.put_pixel(x as u32, y as u32, red_pixel);
-    }
-    image
 }
 
 #[cfg(test)]
