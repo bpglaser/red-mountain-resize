@@ -7,7 +7,8 @@ An image resize tool utilizing seam carving.
 - [x] UX finalized
 - [x] Image Enlargement
 - [x] Reduction/Enlargement in both directions
-- [ ] Optimize energy calculations by only preforming needed updates per cycle.
+- [x] Optimize energy calculations by only preforming needed updates per cycle.
+- [ ] Optimize pathfinding calculations.
 - [ ] Investigate multithreading options via Rayon.
 
 ### Example
