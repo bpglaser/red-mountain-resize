@@ -1,2 +1,3 @@
+newline_style = "Native"
 reorder_imported_names = true
 write_mode = "Overwrite"
