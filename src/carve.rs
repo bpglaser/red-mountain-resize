@@ -54,8 +54,8 @@ impl Carver {
         self.rebuild_image()
     }
 
-    pub fn get_removed_points(&self) -> Vec<(usize, usize)> {
-        self.removed_points.clone()
+    pub fn get_removed_points(self) -> Vec<(usize, usize)> {
+        self.removed_points
     }
 
     fn shrink_distance(&mut self, distance: usize) {
