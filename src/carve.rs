@@ -10,6 +10,7 @@ pub struct Carver {
     grid: Grid<PixelEnergyPoint>,
     removed_points: Vec<(usize, usize)>,
     dirty_points: Vec<Token>,
+    path: Vec<(usize, usize)>,
 }
 
 impl Carver {
@@ -19,6 +20,7 @@ impl Carver {
             grid,
             removed_points: vec![],
             dirty_points: vec![],
+            path: vec![],
         }
     }
 
@@ -62,8 +64,8 @@ impl Carver {
         for _ in 0..distance {
             self.calculate_energy();
             let (start_x, start_y) = self.get_path_start();
-            let path = self.find_path(start_x, start_y);
-            self.remove_path(path);
+            self.find_path(start_x, start_y);
+            self.remove_path();
         }
     }
 
@@ -132,13 +134,14 @@ impl Carver {
         (x, y)
     }
 
-    fn find_path(&self, start_x: usize, start_y: usize) -> Vec<(usize, usize)> {
-        let mut path = vec![(start_x, start_y)];
+    fn find_path(&mut self, start_x: usize, start_y: usize) {
+        self.path.clear();
+        self.path.push((start_x, start_y));
         loop {
-            let &(x, y) = path.last().unwrap();
+            let &(x, y) = self.path.last().unwrap();
             match self.get_parent_with_min_path_cost(x, y) {
-                None => return path,
-                Some(parent) => path.push(parent),
+                None => break,
+                Some(parent) => self.path.push(parent),
             }
         }
     }
@@ -213,8 +216,8 @@ impl Carver {
         Rgba { data }
     }
 
-    fn remove_path(&mut self, points: Vec<(usize, usize)>) {
-        for (x, y) in points {
+    fn remove_path(&mut self) {
+        for &(x, y) in &self.path {
             let adjacent_tokens = self.grid.make_adjacent_tokens(x, y);
             self.dirty_points.extend_from_slice(&adjacent_tokens);
 
@@ -300,9 +303,10 @@ mod tests {
 
     #[test]
     fn carver_small_find_path_test() {
-        let carver = setup_carver!(SMALL);
+        let mut carver = setup_carver!(SMALL);
         let (x, y) = carver.get_path_start();
-        assert_eq!(get_small_path(), carver.find_path(x, y));
+        carver.find_path(x, y);
+        assert_eq!(get_small_path(), carver.path);
     }
 
     #[test]
@@ -327,9 +331,10 @@ mod tests {
 
     #[test]
     fn carver_medium_find_path_test() {
-        let carver = setup_carver!(MEDIUM);
+        let mut carver = setup_carver!(MEDIUM);
         let (x, y) = carver.get_path_start();
-        assert_eq!(get_medium_path(), carver.find_path(x, y));
+        carver.find_path(x, y);
+        assert_eq!(get_medium_path(), carver.path);
     }
 
     static SMALL: &'static [u8; 173] = include_bytes!("../tests/images/small_energy.png");
