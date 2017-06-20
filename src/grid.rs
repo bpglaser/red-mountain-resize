@@ -206,6 +206,23 @@ impl<T> Grid<T> {
         }))
     }
 
+    pub fn coord_iter_mut<'a>(&'a mut self)
+                              -> Box<Iterator<Item = (usize, usize, &'a mut T)> + 'a> {
+        let rotated = self.is_rotated();
+        Box::new(self.points
+                     .iter_mut()
+                     .enumerate()
+                     .flat_map(move |(y, row)| {
+            row.iter_mut()
+                .enumerate()
+                .map(move |(x, item)| if !rotated {
+                         (x, y, &mut item.val)
+                     } else {
+                         (y, x, &mut item.val)
+                     })
+        }))
+    }
+
     pub fn remove_last_column(&mut self) {
         let expect_msg = "Attempted to remove column from empty grid";
         if self.rotated {

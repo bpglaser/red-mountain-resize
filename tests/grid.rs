@@ -97,6 +97,29 @@ fn grid_coord_iter_test() {
 }
 
 #[test]
+fn grid_coord_iter_mut_test() {
+    let mut grid = make_test_grid();
+    let mut iter = grid.coord_iter_mut();
+
+    // First row
+    assert_eq!((0, 0, &mut 0), iter.next().unwrap());
+    assert_eq!((1, 0, &mut 1), iter.next().unwrap());
+    assert_eq!((2, 0, &mut 2), iter.next().unwrap());
+
+    // Second row
+    assert_eq!((0, 1, &mut 3), iter.next().unwrap());
+    assert_eq!((1, 1, &mut 4), iter.next().unwrap());
+    assert_eq!((2, 1, &mut 5), iter.next().unwrap());
+
+    // Third row
+    assert_eq!((0, 2, &mut 6), iter.next().unwrap());
+    assert_eq!((1, 2, &mut 7), iter.next().unwrap());
+    assert_eq!((2, 2, &mut 8), iter.next().unwrap());
+
+    assert!(iter.next().is_none());
+}
+
+#[test]
 fn grid_get_adjacent_test() {
     let grid = make_test_grid();
 
@@ -522,6 +545,30 @@ fn grid_rotation_coord_iter_test() {
     assert_eq!((2, 0, &6), iter.next().unwrap());
     assert_eq!((2, 1, &7), iter.next().unwrap());
     assert_eq!((2, 2, &8), iter.next().unwrap());
+
+    assert!(iter.next().is_none());
+}
+
+#[test]
+fn grid_rotation_coord_iter_mut_test() {
+    let mut grid = make_test_grid();
+    grid.rotate();
+    let mut iter = grid.coord_iter_mut();
+
+    // First row
+    assert_eq!((0, 0, &mut 0), iter.next().unwrap());
+    assert_eq!((0, 1, &mut 1), iter.next().unwrap());
+    assert_eq!((0, 2, &mut 2), iter.next().unwrap());
+
+    // Second row
+    assert_eq!((1, 0, &mut 3), iter.next().unwrap());
+    assert_eq!((1, 1, &mut 4), iter.next().unwrap());
+    assert_eq!((1, 2, &mut 5), iter.next().unwrap());
+
+    // Third row
+    assert_eq!((2, 0, &mut 6), iter.next().unwrap());
+    assert_eq!((2, 1, &mut 7), iter.next().unwrap());
+    assert_eq!((2, 2, &mut 8), iter.next().unwrap());
 
     assert!(iter.next().is_none());
 }
