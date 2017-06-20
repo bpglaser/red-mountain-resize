@@ -162,11 +162,8 @@ impl Carver {
     }
 
     fn reset_positions(&mut self) {
-        for y in 0..self.grid.height() {
-            for x in 0..self.grid.width() {
-                let mut pep = self.grid.get_mut(x, y);
-                pep.original_position = (x, y);
-            }
+        for (x, y, pep) in self.grid.coord_iter_mut() {
+            pep.original_position = (x, y);
         }
     }
 
