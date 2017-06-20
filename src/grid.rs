@@ -176,12 +176,34 @@ impl<T> Grid<T> {
         self.rotated
     }
 
-    pub fn coord_iter(&self) -> PointIter<T> {
-        PointIter {
-            x: 0,
-            y: 0,
-            grid: &self,
-        }
+    pub fn iter<'a>(&'a self) -> Box<Iterator<Item = &'a T> + 'a> {
+        Box::new(self.points
+                     .iter()
+                     .flat_map(|row| row.iter())
+                     .map(|item| &item.val))
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> Box<Iterator<Item = &'a mut T> + 'a> {
+        Box::new(self.points
+                     .iter_mut()
+                     .flat_map(|row| row.iter_mut())
+                     .map(|item| &mut item.val))
+    }
+
+    pub fn coord_iter<'a>(&'a self) -> Box<Iterator<Item = (usize, usize, &'a T)> + 'a> {
+        let rotated = self.is_rotated();
+        Box::new(self.points
+                     .iter()
+                     .enumerate()
+                     .flat_map(move |(y, row)| {
+            row.iter()
+                .enumerate()
+                .map(move |(x, item)| if !rotated {
+                         (x, y, &item.val)
+                     } else {
+                         (y, x, &item.val)
+                     })
+        }))
     }
 
     pub fn remove_last_column(&mut self) {
@@ -352,32 +374,5 @@ impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
         }
 
         Grid::new(rows)
-    }
-}
-
-pub struct PointIter<'a, T: 'a> {
-    x: usize,
-    y: usize,
-    grid: &'a Grid<T>,
-}
-
-impl<'a, T> Iterator for PointIter<'a, T> {
-    type Item = (usize, usize, &'a T);
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.y >= self.grid.height() {
-            return None;
-        }
-
-        let x = self.x;
-        let y = self.y;
-        let val = self.grid.get(x, y);
-
-        self.x += 1;
-        if self.x >= self.grid.width() {
-            self.x = 0;
-            self.y += 1;
-        }
-
-        Some((x, y, val))
     }
 }

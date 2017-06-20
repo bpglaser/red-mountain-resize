@@ -57,6 +57,23 @@ fn grid_get_mut_test() {
 }
 
 #[test]
+fn grid_iter_test() {
+    let grid = make_test_grid();
+
+    let collection: Vec<_> = grid.iter().collect();
+    assert_eq!(vec![&0, &1, &2, &3, &4, &5, &6, &7, &8], collection);
+}
+
+#[test]
+fn grid_iter_mut_test() {
+    let mut grid = make_test_grid();
+
+    let collection: Vec<_> = grid.iter_mut().collect();
+    assert_eq!(vec![&mut 0, &mut 1, &mut 2, &mut 3, &mut 4, &mut 5, &mut 6, &mut 7, &mut 8],
+               collection);
+}
+
+#[test]
 fn grid_coord_iter_test() {
     let grid = make_test_grid();
     let mut iter = grid.coord_iter();
@@ -467,24 +484,43 @@ fn grid_rotation_get_mut_test() {
 }
 
 #[test]
+fn grid_rotation_iter_test() {
+    let mut grid = make_test_grid();
+    grid.rotate();
+
+    let collection: Vec<_> = grid.iter().collect();
+    assert_eq!(vec![&0, &1, &2, &3, &4, &5, &6, &7, &8], collection);
+}
+
+#[test]
+fn grid_rotation_iter_mut_test() {
+    let mut grid = make_test_grid();
+    grid.rotate();
+
+    let collection: Vec<_> = grid.iter_mut().collect();
+    assert_eq!(vec![&mut 0, &mut 1, &mut 2, &mut 3, &mut 4, &mut 5, &mut 6, &mut 7, &mut 8],
+               collection);
+}
+
+#[test]
 fn grid_rotation_coord_iter_test() {
     let mut grid = make_test_grid();
     grid.rotate();
     let mut iter = grid.coord_iter();
 
-    // First row
+    // First column
     assert_eq!((0, 0, &0), iter.next().unwrap());
-    assert_eq!((1, 0, &3), iter.next().unwrap());
-    assert_eq!((2, 0, &6), iter.next().unwrap());
-
-    // Second row
     assert_eq!((0, 1, &1), iter.next().unwrap());
-    assert_eq!((1, 1, &4), iter.next().unwrap());
-    assert_eq!((2, 1, &7), iter.next().unwrap());
-
-    // Third row
     assert_eq!((0, 2, &2), iter.next().unwrap());
+
+    // Second column
+    assert_eq!((1, 0, &3), iter.next().unwrap());
+    assert_eq!((1, 1, &4), iter.next().unwrap());
     assert_eq!((1, 2, &5), iter.next().unwrap());
+
+    // Third column
+    assert_eq!((2, 0, &6), iter.next().unwrap());
+    assert_eq!((2, 1, &7), iter.next().unwrap());
     assert_eq!((2, 2, &8), iter.next().unwrap());
 
     assert!(iter.next().is_none());
