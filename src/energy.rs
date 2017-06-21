@@ -51,6 +51,11 @@ impl PixelEnergyPoint {
         }
         sum
     }
+
+    pub fn average(&self, other: &PixelEnergyPoint) -> PixelEnergyPoint {
+        let data = average_pixel_data(&self.pixel.data, &other.pixel.data);
+        Rgba { data }.into()
+    }
 }
 
 impl From<Rgba<u8>> for PixelEnergyPoint {
@@ -64,7 +69,7 @@ impl From<Rgba<u8>> for PixelEnergyPoint {
     }
 }
 
-pub fn average_pixels(pixel1: &[u8; 4], pixel2: &[u8; 4]) -> [u8; 4] {
+fn average_pixel_data(pixel1: &[u8; 4], pixel2: &[u8; 4]) -> [u8; 4] {
     [((pixel1[0] as u16 + pixel2[0] as u16) / 2) as u8,
      ((pixel1[1] as u16 + pixel2[1] as u16) / 2) as u8,
      ((pixel1[2] as u16 + pixel2[2] as u16) / 2) as u8,

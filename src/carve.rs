@@ -1,8 +1,8 @@
 use std::mem;
 
-use image::{DynamicImage, GenericImage, Rgba};
+use image::{DynamicImage, GenericImage};
 
-use energy::{PixelEnergyPoint, average_pixels};
+use energy::PixelEnergyPoint;
 use grid::{Grid, Token};
 
 #[derive(Clone)]
@@ -77,9 +77,12 @@ impl Carver {
         }
 
         for (x, y) in points {
-            let left = self.grid.get(x, y).pixel;
-            let pixel = self.average_pixel_from_neighbors(x, y, left);
-            self.add_point(x, y, pixel)
+            let pep = {
+                let left = self.grid.get(x, y);
+                let right = self.grid.get(x + 1, y);
+                left.average(&right)
+            };
+            self.add_point(x, y, pep)
         }
     }
 
@@ -200,17 +203,11 @@ impl Carver {
             .map(|(x, y, _)| (x, y))
     }
 
-    fn add_point(&mut self, x: usize, y: usize, pixel: Rgba<u8>) {
+    fn add_point(&mut self, x: usize, y: usize, pep: PixelEnergyPoint) {
         self.removed_points
             .push(self.grid.get(x, y).original_position);
         self.grid.shift_row_right_from_point(x, y);
-        *self.grid.get_mut(x + 1, y) = pixel.into();
-    }
-
-    fn average_pixel_from_neighbors(&self, x: usize, y: usize, left: Rgba<u8>) -> Rgba<u8> {
-        let right = self.grid.get(x + 1, y).pixel;
-        let data = average_pixels(&left.data, &right.data);
-        Rgba { data }
+        *self.grid.get_mut(x + 1, y) = pep;
     }
 
     fn remove_path(&mut self) {
