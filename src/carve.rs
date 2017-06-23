@@ -29,7 +29,7 @@ impl Carver {
         let initial_width = self.grid.width();
         let initial_height = self.grid.height();
 
-        self.calculate_all_pixel_energy();
+        self.calculate_all_energy();
         let mut width_changed = false;
 
         if width > initial_width {
@@ -41,7 +41,7 @@ impl Carver {
         }
 
         if width_changed && height != initial_height {
-            self.calculate_all_pixel_energy();
+            self.calculate_all_energy();
         }
 
         if height > initial_height {
@@ -104,10 +104,11 @@ impl Carver {
         }
     }
 
-    fn calculate_all_pixel_energy(&mut self) {
+    fn calculate_all_energy(&mut self) {
         for y in 0..self.grid.height() {
             for x in 0..self.grid.width() {
                 self.calculate_pixel_energy(x, y);
+                self.calculate_path_cost(x, y);
             }
         }
     }
@@ -255,7 +256,7 @@ mod tests {
             {
                 let input = image::load_from_memory($bytes).unwrap();
                 let mut carver = Carver::new(&input);
-                carver.calculate_all_pixel_energy();
+                carver.calculate_all_energy();
                 carver.calculate_energy();
                 carver
             }
