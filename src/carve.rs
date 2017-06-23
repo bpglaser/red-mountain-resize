@@ -100,7 +100,13 @@ impl Carver {
         }
 
         while let Some(Point { x, y }) = dirty_points.pop() {
-            self.calculate_path_cost(x, y);
+            if self.calculate_path_cost(x, y) {
+                for point in self.grid.get_children_coords(x, y).iter() {
+                    if let &Some(point) = point {
+                        dirty_points.push(point);
+                    }
+                }
+            }
         }
     }
 
@@ -124,10 +130,20 @@ impl Carver {
         self.grid.get_mut(x, y).energy = energy;
     }
 
-    fn calculate_path_cost(&mut self, x: usize, y: usize) {
+    // returns true if the path_cost was changed
+    fn calculate_path_cost(&mut self, x: usize, y: usize) -> bool {
         let min_parent_path_cost = self.get_min_parent_path_cost(x, y);
         let energy = self.grid.get(x, y).energy;
-        self.grid.get_mut(x, y).path_cost = min_parent_path_cost + energy;
+
+        let old_path_cost = self.grid.get(x, y).path_cost;
+        let new_path_cost = min_parent_path_cost + energy;
+
+        if old_path_cost != new_path_cost {
+            self.grid.get_mut(x, y).path_cost = new_path_cost;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     fn get_path_start(&self) -> (usize, usize) {
