@@ -262,6 +262,19 @@ impl<T> Grid<T> {
         [left, right, up, down]
     }
 
+    pub fn downgrade(&self, token: &Token) -> Option<(usize, usize)> {
+        match token.try_get() {
+            None => None,
+            Some((x, y)) => {
+                if !self.is_rotated() {
+                    Some((x, y))
+                } else {
+                    Some((y, x))
+                }
+            }
+        }
+    }
+
     pub fn trade(&self, token: Token) -> Option<&T> {
         token.try_get().map(|(x, y)| &self.points[y][x].val)
     }

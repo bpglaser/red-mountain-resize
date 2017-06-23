@@ -1,9 +1,10 @@
-use std::mem;
+use std::collections::BinaryHeap;
 
 use image::{DynamicImage, GenericImage};
 
 use energy::PixelEnergyPoint;
 use grid::{Grid, Token};
+use point::Point;
 
 #[derive(Clone)]
 pub struct Carver {
@@ -87,17 +88,19 @@ impl Carver {
     }
 
     fn calculate_energy(&mut self) {
-        let mut dirty_points = vec![];
-        mem::swap(&mut dirty_points, &mut self.dirty_points);
+        let mut dirty_points: BinaryHeap<Point> = self.dirty_points
+            .iter()
+            .filter_map(|token| self.grid.downgrade(token))
+            .map(From::from)
+            .collect();
+        self.dirty_points.clear();
 
-        for token in dirty_points {
-            self.calculate_pixel_energy_from_token(token);
+        for &Point { x, y } in &dirty_points {
+            self.calculate_pixel_energy(x, y);
         }
 
-        for y in 0..self.grid.height() {
-            for x in 0..self.grid.width() {
-                self.calculate_path_cost(x, y);
-            }
+        while let Some(Point { x, y }) = dirty_points.pop() {
+            self.calculate_path_cost(x, y);
         }
     }
 
@@ -168,22 +171,6 @@ impl Carver {
         for (x, y, pep) in self.grid.coord_iter_mut() {
             pep.original_position = (x, y);
         }
-    }
-
-    fn calculate_pixel_energy_from_token(&mut self, token: Token) {
-        let energy = match self.grid.get_token_adjacent(&token) {
-            None => return,
-            Some((left, right, up, down)) => {
-                let horizontal_square_gradient = left.square_gradient(right);
-                let vertical_square_gradient = up.square_gradient(down);
-                horizontal_square_gradient + vertical_square_gradient
-            }
-        };
-
-        self.grid
-            .trade_mut(token)
-            .expect("token should still be valid")
-            .energy = energy;
     }
 
     fn get_min_parent_path_cost(&self, x: usize, y: usize) -> u32 {
