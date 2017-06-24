@@ -444,6 +444,49 @@ fn grid_token_shift_row_right_from_point_test() {
     assert!(iter.next().is_none());
 }
 
+#[test]
+fn grid_get_children_coords_test() {
+    let grid = make_test_grid();
+
+    assert_eq!([None, Some((0, 1)), Some((1, 1))],
+               grid.get_children_coords(0, 0));
+    assert_eq!([Some((0, 1)), Some((1, 1)), Some((2, 1))],
+               grid.get_children_coords(1, 0));
+    assert_eq!([Some((1, 1)), Some((2, 1)), None],
+               grid.get_children_coords(2, 0));
+
+    assert_eq!([None, Some((0, 2)), Some((1, 2))],
+               grid.get_children_coords(0, 1));
+    assert_eq!([Some((0, 2)), Some((1, 2)), Some((2, 2))],
+               grid.get_children_coords(1, 1));
+    assert_eq!([Some((1, 2)), Some((2, 2)), None],
+               grid.get_children_coords(2, 1));
+
+    assert_eq!([None, None, None], grid.get_children_coords(0, 2));
+    assert_eq!([None, None, None], grid.get_children_coords(1, 2));
+    assert_eq!([None, None, None], grid.get_children_coords(2, 2));
+}
+
+#[test]
+fn grid_downgrade_test() {
+    let mut grid = make_test_grid();
+
+    let mut tokens = vec![];
+    for y in 0..grid.height() {
+        for x in 0..grid.width() {
+            tokens.push(grid.make_token(x, y));
+        }
+    }
+
+    let mut tokens = tokens.into_iter();
+    for y in 0..grid.height() {
+        for x in 0..grid.width() {
+            assert_eq!(Some((x, y)), grid.downgrade(&tokens.next().unwrap()));
+        }
+    }
+    assert!(tokens.next().is_none());
+}
+
 // Rotated test grid visualized:
 //  -----------
 // | 0 | 3 | 6 |
@@ -771,6 +814,53 @@ fn grid_rotation_before_token_trade_mut_test() {
     assert_eq!(&mut 5, grid.trade_mut(iter.next().unwrap()).unwrap());
     assert_eq!(&mut 8, grid.trade_mut(iter.next().unwrap()).unwrap());
     assert!(iter.next().is_none());
+}
+
+#[test]
+fn grid_rotation_get_children_coords_test() {
+    let mut grid = make_test_grid();
+    grid.rotate();
+
+    assert_eq!([None, Some((0, 1)), Some((1, 1))],
+               grid.get_children_coords(0, 0));
+    assert_eq!([Some((0, 1)), Some((1, 1)), Some((2, 1))],
+               grid.get_children_coords(1, 0));
+    assert_eq!([Some((1, 1)), Some((2, 1)), None],
+               grid.get_children_coords(2, 0));
+
+    assert_eq!([None, Some((0, 2)), Some((1, 2))],
+               grid.get_children_coords(0, 1));
+    assert_eq!([Some((0, 2)), Some((1, 2)), Some((2, 2))],
+               grid.get_children_coords(1, 1));
+    assert_eq!([Some((1, 2)), Some((2, 2)), None],
+               grid.get_children_coords(2, 1));
+
+    assert_eq!([None, None, None], grid.get_children_coords(0, 2));
+    assert_eq!([None, None, None], grid.get_children_coords(1, 2));
+    assert_eq!([None, None, None], grid.get_children_coords(2, 2));
+}
+
+#[test]
+fn grid_rotation_downgrade_test() {
+    let mut grid = make_test_grid();
+
+    let mut tokens = vec![];
+    for y in 0..grid.height() {
+        for x in 0..grid.width() {
+            tokens.push(grid.make_token(x, y));
+        }
+    }
+
+    grid.rotate();
+
+    let given = vec![(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)];
+
+    let result: Vec<_> = tokens
+        .iter()
+        .filter_map(|token| grid.downgrade(token))
+        .collect();
+
+    assert_eq!(given, result);
 }
 
 fn make_test_grid() -> Grid<isize> {

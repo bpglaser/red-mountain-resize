@@ -4,7 +4,6 @@ use std::rc::{Rc, Weak};
 use image::{DynamicImage, GenericImage};
 
 use energy::PixelEnergyPoint;
-use point::Point;
 
 type StrongPosition = Rc<Cell<(usize, usize)>>;
 type WeakPosition = Weak<Cell<(usize, usize)>>;
@@ -145,7 +144,7 @@ impl<T> Grid<T> {
         parents
     }
 
-    pub fn get_children_coords(&self, x: usize, y: usize) -> [Option<Point>; 3] {
+    pub fn get_children_coords(&self, x: usize, y: usize) -> [Option<(usize, usize)>; 3] {
         let mut children = [None, None, None];
 
         if y >= self.height() - 1 {
@@ -153,13 +152,13 @@ impl<T> Grid<T> {
         }
 
         if x > 0 {
-            children[0] = Some((x - 1, y + 1).into());
+            children[0] = Some((x - 1, y + 1));
         }
 
-        children[1] = Some((x, y + 1).into());
+        children[1] = Some((x, y + 1));
 
         if x < self.width() - 1 {
-            children[2] = Some((x + 1, y + 1).into());
+            children[2] = Some((x + 1, y + 1));
         }
 
         children

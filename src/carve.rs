@@ -103,7 +103,7 @@ impl Carver {
             if self.calculate_path_cost(x, y) {
                 for point in self.grid.get_children_coords(x, y).iter() {
                     if let &Some(point) = point {
-                        dirty_points.push(point);
+                        dirty_points.push(point.into());
                     }
                 }
             }
@@ -111,6 +111,7 @@ impl Carver {
     }
 
     fn calculate_all_energy(&mut self) {
+        self.dirty_points.clear();
         for y in 0..self.grid.height() {
             for x in 0..self.grid.width() {
                 self.calculate_pixel_energy(x, y);
