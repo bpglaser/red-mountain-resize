@@ -29,28 +29,25 @@ impl Carver {
         let initial_width = self.grid.width();
         let initial_height = self.grid.height();
 
-        self.calculate_all_energy();
-        let mut width_changed = false;
 
         if width > initial_width {
-            self.grow_distance(width - initial_width);
-            width_changed = true;
-        } else if width < initial_width {
-            self.shrink_distance(initial_width - width);
-            width_changed = true;
-        }
-
-        if width_changed && height != initial_height {
             self.calculate_all_energy();
+            self.grow_distance(width - initial_width);
+        } else if width < initial_width {
+            self.calculate_all_energy();
+            self.shrink_distance(initial_width - width);
         }
 
-        if height > initial_height {
+        if height != initial_height {
             self.grid.rotate();
-            self.grow_distance(height - initial_height);
-            self.grid.rotate();
-        } else if height < initial_height {
-            self.grid.rotate();
-            self.shrink_distance(initial_height - height);
+            self.calculate_all_energy();
+
+            if height > initial_height {
+                self.grow_distance(height - initial_height);
+            } else if height < initial_height {
+                self.shrink_distance(initial_height - height);
+            }
+
             self.grid.rotate();
         }
 
@@ -268,13 +265,20 @@ mod tests {
     use image;
     use super::Carver;
 
-    macro_rules! setup_carver {
+    macro_rules! load_carver {
         ( $bytes:expr ) => {
             {
                 let input = image::load_from_memory($bytes).unwrap();
-                let mut carver = Carver::new(&input);
+                Carver::new(&input)
+            }
+        };
+    }
+
+    macro_rules! setup_carver {
+        ( $bytes:expr ) => {
+            {
+                let mut carver = load_carver!($bytes);
                 carver.calculate_all_energy();
-                carver.calculate_energy();
                 carver
             }
         };
