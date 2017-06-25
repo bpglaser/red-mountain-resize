@@ -1,10 +1,8 @@
-use std::collections::BinaryHeap;
-
 use image::{DynamicImage, GenericImage};
 
 use energy::PixelEnergyPoint;
 use grid::{Grid, Token};
-use point::Point;
+use point_stack::PointStack;
 
 #[derive(Clone)]
 pub struct Carver {
@@ -85,22 +83,21 @@ impl Carver {
     }
 
     fn calculate_energy(&mut self) {
-        let mut dirty_points: BinaryHeap<Point> = self.dirty_points
+        let mut dirty_points: PointStack = self.dirty_points
             .iter()
             .filter_map(|token| self.grid.downgrade(token))
-            .map(From::from)
             .collect();
         self.dirty_points.clear();
 
-        for &Point { x, y } in &dirty_points {
+        for &(x, y) in &dirty_points {
             self.calculate_pixel_energy(x, y);
         }
 
-        while let Some(Point { x, y }) = dirty_points.pop() {
+        while let Some((x, y)) = dirty_points.pop() {
             if self.calculate_path_cost(x, y) {
                 for point in self.grid.get_children_coords(x, y).iter() {
                     if let &Some(point) = point {
-                        dirty_points.push(point.into());
+                        dirty_points.insert(point);
                     }
                 }
             }
