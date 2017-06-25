@@ -17,7 +17,7 @@ impl From<(usize, usize)> for Point {
 
 impl Ord for Point {
     fn cmp(&self, other: &Point) -> Ordering {
-        self.y.cmp(&other.y).then(self.x.cmp(&other.x)).reverse()
+        self.y.cmp(&other.y).reverse()
     }
 }
 
