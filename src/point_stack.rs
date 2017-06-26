@@ -1,48 +1,61 @@
 use std::iter::FromIterator;
-use std::slice::Iter;
 
 type Point = (usize, usize);
 
 pub struct PointStack {
-    inner: Vec<Point>,
+    inner: Vec<Vec<Point>>,
 }
 
 impl PointStack {
     pub fn insert(&mut self, point: Point) {
-        let mut i = self.inner.len() - 1;
-        loop {
-            if self.inner[i].1 >= point.1 {
-                self.inner.insert(i + 1, point);
-                return;
-            }
-
-            if i == 0 {
-                self.inner.insert(0, point);
-                return;
-            }
-
-            i -= 1;
-        }
+        let i = self.inner.len() - 2;
+        self.inner[i].push(point)
     }
 
     pub fn pop(&mut self) -> Option<Point> {
-        self.inner.pop()
+        match self.inner.last_mut().and_then(|row| row.pop()) {
+            Some(point) => Some(point),
+            None => {
+                if self.inner.pop().is_some() {
+                    self.pop()
+                } else {
+                    None
+                }
+            }
+        }
     }
 }
 
 impl FromIterator<Point> for PointStack {
     fn from_iter<I: IntoIterator<Item = Point>>(iter: I) -> Self {
-        let mut inner: Vec<_> = iter.into_iter().collect();
-        inner.sort_by(|a, b| b.1.cmp(&a.1));
+        let mut initial_points: Vec<_> = iter.into_iter().collect();
+        initial_points.sort_by(|a, b| b.1.cmp(&a.1));
+
+        let mut inner = vec![];
+        let mut outer_y = None;
+        let mut row = vec![];
+
+        for point in initial_points {
+            if let Some(inner_y) = outer_y {
+                if point.1 != inner_y {
+                    inner.push(row);
+                    outer_y = Some(point.1);
+                    row = vec![point];
+                    continue;
+                }
+            }
+            row.push(point);
+        }
+
         PointStack { inner }
     }
 }
 
 impl<'a> IntoIterator for &'a PointStack {
     type Item = &'a Point;
-    type IntoIter = Iter<'a, Point>;
+    type IntoIter = Box<Iterator<Item=Self::Item> + 'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.inner.iter()
+        Box::new(self.inner.iter().flat_map(|row| row.iter()))
     }
 }
