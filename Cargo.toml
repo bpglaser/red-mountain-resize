@@ -10,4 +10,5 @@ doc = false
 [dependencies]
 clap = "2.24.2"
 image = "0.12.4"
+itertools = "0.6.0"
 num-traits = "0.1.39"

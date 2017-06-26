@@ -1,5 +1,7 @@
 use std::iter::FromIterator;
 
+use itertools::Itertools;
+
 type Point = (usize, usize);
 
 pub struct PointStack {
@@ -31,21 +33,12 @@ impl FromIterator<Point> for PointStack {
         let mut initial_points: Vec<_> = iter.into_iter().collect();
         initial_points.sort_by(|a, b| b.1.cmp(&a.1));
 
-        let mut inner = vec![];
-        let mut outer_y = None;
-        let mut row = vec![];
-
-        for point in initial_points {
-            if let Some(inner_y) = outer_y {
-                if point.1 != inner_y {
-                    inner.push(row);
-                    outer_y = Some(point.1);
-                    row = vec![point];
-                    continue;
-                }
-            }
-            row.push(point);
-        }
+        let inner = initial_points
+            .into_iter()
+            .group_by(|&(_, y)| y)
+            .into_iter()
+            .map(|(_, group)| group.collect())
+            .collect();
 
         PointStack { inner }
     }
@@ -53,9 +46,30 @@ impl FromIterator<Point> for PointStack {
 
 impl<'a> IntoIterator for &'a PointStack {
     type Item = &'a Point;
-    type IntoIter = Box<Iterator<Item=Self::Item> + 'a>;
+    type IntoIter = Box<Iterator<Item = Self::Item> + 'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         Box::new(self.inner.iter().flat_map(|row| row.iter()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn creation() {
+        let point_stack: PointStack = [(0, 0), (0, 1), (1, 1), (0, 2), (0, 3), (1, 3), (0, 4),
+                                       (1, 4)]
+                .iter()
+                .cloned()
+                .collect();
+
+        assert_eq!(vec![vec![(0, 4), (1, 4)],
+                        vec![(0, 3), (1, 3)],
+                        vec![(0, 2)],
+                        vec![(0, 1), (1, 1)],
+                        vec![(0, 0)]],
+                   point_stack.inner);
     }
 }

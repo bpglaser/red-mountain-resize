@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate clap;
 extern crate image;
+extern crate itertools;
 extern crate num_traits;
 
 pub mod carve;
