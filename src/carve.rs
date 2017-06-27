@@ -10,6 +10,7 @@ pub struct Carver {
     removed_points: Vec<(usize, usize)>,
     dirty_points: Vec<Token>,
     path: Vec<(usize, usize)>,
+    point_stack: PointStack,
 }
 
 impl Carver {
@@ -20,6 +21,7 @@ impl Carver {
             removed_points: vec![],
             dirty_points: vec![],
             path: vec![],
+            point_stack: PointStack::new(),
         }
     }
 
@@ -83,7 +85,11 @@ impl Carver {
     }
 
     fn calculate_energy(&mut self) {
-        let mut dirty_points: PointStack = self.dirty_points
+        if self.dirty_points.is_empty() {
+            return;
+        }
+
+        let dirty_points: Vec<_> = self.dirty_points
             .iter()
             .filter_map(|token| self.grid.downgrade(token))
             .collect();
@@ -93,11 +99,13 @@ impl Carver {
             self.calculate_pixel_energy(x, y);
         }
 
-        while let Some((x, y)) = dirty_points.pop() {
+        self.point_stack.fill_path(dirty_points);
+
+        while let Some((x, y)) = self.point_stack.pop() {
             if self.calculate_path_cost(x, y) {
                 for point in self.grid.get_children_coords(x, y).iter() {
                     if let &Some(point) = point {
-                        dirty_points.insert(point);
+                        self.point_stack.insert(point);
                     }
                 }
             }

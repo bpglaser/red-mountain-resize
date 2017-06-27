@@ -1,55 +1,52 @@
-use std::iter::FromIterator;
-
-use itertools::Itertools;
-
 type Point = (usize, usize);
 
+#[derive(Clone)]
 pub struct PointStack {
-    inner: Vec<Vec<Point>>,
+    path: Vec<Option<Point>>,
+    next_row: Vec<Point>,
 }
 
 impl PointStack {
+    pub fn new() -> Self {
+        PointStack {
+            path: vec![],
+            next_row: vec![],
+        }
+    }
+
     pub fn insert(&mut self, point: Point) {
-        let i = self.inner.len() - 2;
-        self.inner[i].push(point)
+        self.next_row.push(point)
     }
 
     pub fn pop(&mut self) -> Option<Point> {
-        match self.inner.last_mut().and_then(|row| row.pop()) {
+        if self.path.is_empty() {
+            return None;
+        } else {
+            if self.path.last().unwrap().is_some() {
+                return self.path.pop().unwrap();
+            }
+        }
+
+        match self.next_row.pop() {
             Some(point) => Some(point),
             None => {
-                if self.inner.pop().is_some() {
-                    self.pop()
-                } else {
-                    None
-                }
+                self.path.pop();
+                self.pop()
             }
         }
     }
-}
 
-impl FromIterator<Point> for PointStack {
-    fn from_iter<I: IntoIterator<Item = Point>>(iter: I) -> Self {
-        let mut initial_points: Vec<_> = iter.into_iter().collect();
-        initial_points.sort_by(|a, b| b.1.cmp(&a.1));
+    pub fn fill_path(&mut self, mut points: Vec<Point>) {
+        points.sort_by(|a, b| b.1.cmp(&a.1));
 
-        let inner = initial_points
-            .into_iter()
-            .group_by(|&(_, y)| y)
-            .into_iter()
-            .map(|(_, group)| group.collect())
-            .collect();
-
-        PointStack { inner }
-    }
-}
-
-impl<'a> IntoIterator for &'a PointStack {
-    type Item = &'a Point;
-    type IntoIter = Box<Iterator<Item = Self::Item> + 'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        Box::new(self.inner.iter().flat_map(|row| row.iter()))
+        let mut prev_y = points[0].1;
+        for point in points {
+            if prev_y != point.1 {
+                prev_y = point.1;
+                self.path.push(None);
+            }
+            self.path.push(Some(point));
+        }
     }
 }
 
@@ -59,17 +56,6 @@ mod tests {
 
     #[test]
     fn creation() {
-        let point_stack: PointStack = [(0, 0), (0, 1), (1, 1), (0, 2), (0, 3), (1, 3), (0, 4),
-                                       (1, 4)]
-                .iter()
-                .cloned()
-                .collect();
-
-        assert_eq!(vec![vec![(0, 4), (1, 4)],
-                        vec![(0, 3), (1, 3)],
-                        vec![(0, 2)],
-                        vec![(0, 1), (1, 1)],
-                        vec![(0, 0)]],
-                   point_stack.inner);
+        unimplemented!()
     }
 }
