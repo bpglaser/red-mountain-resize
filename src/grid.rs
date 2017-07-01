@@ -169,6 +169,10 @@ impl<T> Grid<T> {
         parents
     }
 
+    pub fn iter_parents_with_coords(&self, x: usize, y: usize) -> ParentCoordIter<T> {
+        self.iter_parents(x, y).coordinate()
+    }
+
     pub fn get_row(&self, y: usize) -> Vec<&T> {
         let mut row = vec![];
         for x in 0..self.width() {
@@ -426,6 +430,12 @@ pub struct ParentIter<'a, T: 'a> {
     grid: &'a Grid<T>,
 }
 
+impl<'a, T> ParentIter<'a, T> {
+    fn coordinate(self) -> ParentCoordIter<'a, T> {
+        ParentCoordIter { inner: self }
+    }
+}
+
 impl<'a, T> Iterator for ParentIter<'a, T> {
     type Item = &'a T;
 
@@ -438,5 +448,19 @@ impl<'a, T> Iterator for ParentIter<'a, T> {
         } else {
             None
         }
+    }
+}
+
+pub struct ParentCoordIter<'a, T: 'a> {
+    inner: ParentIter<'a, T>,
+}
+
+impl<'a, T> Iterator for ParentCoordIter<'a, T> {
+    type Item = (usize, usize, &'a T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let x = self.inner.x;
+        let y = self.inner.y;
+        self.inner.next().map(|item| (x, y, item))
     }
 }

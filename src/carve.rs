@@ -196,8 +196,7 @@ impl Carver {
 
     fn get_parent_with_min_path_cost(&self, x: usize, y: usize) -> Option<(usize, usize)> {
         self.grid
-            .get_parents_indexed(x, y)
-            .into_iter()
+            .iter_parents_with_coords(x, y)
             .min_by_key(|&(_, _, pep)| pep.path_cost)
             .map(|(x, y, _)| (x, y))
     }
