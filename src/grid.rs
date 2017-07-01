@@ -126,6 +126,31 @@ impl<T> Grid<T> {
         parents
     }
 
+    pub fn iter_parents(&self, mut x: usize, mut y: usize) -> ParentIter<T> {
+        let remaining;
+        if y == 0 {
+            remaining = 0;
+        } else {
+            y -= 1;
+            if x == 0 {
+                remaining = 2;
+            } else if x == self.width() - 1 {
+                x -= 1;
+                remaining = 2;
+            } else {
+                x -= 1;
+                remaining = 3;
+            }
+        }
+
+        ParentIter {
+            x,
+            y,
+            remaining,
+            grid: self,
+        }
+    }
+
     pub fn get_parents_indexed(&self, x: usize, y: usize) -> Vec<(usize, usize, &T)> {
         let mut parents = vec![];
 
@@ -391,5 +416,27 @@ impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
         }
 
         Grid::new(rows)
+    }
+}
+
+pub struct ParentIter<'a, T: 'a> {
+    x: usize,
+    y: usize,
+    remaining: u32,
+    grid: &'a Grid<T>,
+}
+
+impl<'a, T> Iterator for ParentIter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.remaining > 0 {
+            let result = Some(self.grid.get(self.x, self.y));
+            self.x += 1;
+            self.remaining -= 1;
+            result
+        } else {
+            None
+        }
     }
 }

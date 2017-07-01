@@ -188,9 +188,8 @@ impl Carver {
 
     fn get_min_parent_path_cost(&self, x: usize, y: usize) -> u32 {
         self.grid
-            .get_parents(x, y)
-            .into_iter()
-            .filter_map(|opt| opt.map(|pep| pep.path_cost))
+            .iter_parents(x, y)
+            .map(|pep| pep.path_cost)
             .min()
             .unwrap_or(0)
     }

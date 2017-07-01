@@ -202,6 +202,28 @@ fn grid_get_parents_test() {
 }
 
 #[test]
+fn grid_iter_parents_test() {
+    let grid = make_test_grid();
+
+    // First row
+    assert!(grid.iter_parents(0, 0).next().is_none());
+    assert!(grid.iter_parents(1, 0).next().is_none());
+    assert!(grid.iter_parents(2, 0).next().is_none());
+
+    // Second row
+    assert_eq!(vec![&0, &1], grid.iter_parents(0, 1).collect::<Vec<_>>());
+    assert_eq!(vec![&0, &1, &2],
+               grid.iter_parents(1, 1).collect::<Vec<_>>());
+    assert_eq!(vec![&1, &2], grid.iter_parents(2, 1).collect::<Vec<_>>());
+
+    // Third row
+    assert_eq!(vec![&3, &4], grid.iter_parents(0, 2).collect::<Vec<_>>());
+    assert_eq!(vec![&3, &4, &5],
+               grid.iter_parents(1, 2).collect::<Vec<_>>());
+    assert_eq!(vec![&4, &5], grid.iter_parents(2, 2).collect::<Vec<_>>());
+}
+
+#[test]
 fn grid_get_parents_indexed_test() {
     let grid = make_test_grid();
 
