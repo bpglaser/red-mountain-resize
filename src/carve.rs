@@ -165,8 +165,9 @@ impl Carver {
     }
 
     fn reset_positions(&mut self) {
+        let is_rotated = self.grid.is_rotated();
         for (x, y, pep) in self.grid.coord_iter_mut() {
-            pep.original_position = (x, y);
+            pep.original_position = if !is_rotated { (x, y) } else { (y, x) }
         }
     }
 

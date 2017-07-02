@@ -55,27 +55,15 @@ impl<T> Grid<T> {
     }
 
     pub fn height(&self) -> usize {
-        if !self.rotated {
-            self.points.len()
-        } else {
-            self.points[0].len()
-        }
+        self.points.len()
     }
 
     pub fn width(&self) -> usize {
-        if !self.rotated {
-            self.points[0].len()
-        } else {
-            self.points.len()
-        }
+        self.points[0].len()
     }
 
     pub fn get(&self, x: usize, y: usize) -> &T {
-        if !self.rotated {
-            &self.points[y][x].val
-        } else {
-            &self.points[x][y].val
-        }
+        &self.points[y][x].val
     }
 
     pub fn get_adjacent(&self, x: usize, y: usize) -> (&T, &T, &T, &T) {
@@ -190,15 +178,26 @@ impl<T> Grid<T> {
     }
 
     pub fn get_mut(&mut self, x: usize, y: usize) -> &mut T {
-        if !self.rotated {
-            &mut self.points[y][x].val
-        } else {
-            &mut self.points[x][y].val
-        }
+        &mut self.points[y][x].val
     }
 
     pub fn rotate(&mut self) {
         self.rotated = !self.rotated;
+
+        let mut rows = vec![];
+        'outer: loop {
+            let mut row = vec![];
+            for cur in &mut self.points {
+                match cur.pop() {
+                    Some(val) => row.push(val),
+                    None => break 'outer,
+                }
+            }
+            rows.push(row);
+        }
+        rows.reverse();
+
+        self.points = rows;
     }
 
     pub fn is_rotated(&self) -> bool {
@@ -253,25 +252,16 @@ impl<T> Grid<T> {
     }
 
     pub fn remove_last_column(&mut self) {
-        let expect_msg = "Attempted to remove column from empty grid";
-        if self.rotated {
-            self.points.pop().expect(expect_msg);
-        } else {
-            for mut row in self.points.iter_mut() {
-                row.pop().expect(expect_msg);
-            }
+        for mut row in self.points.iter_mut() {
+            row.pop()
+                .expect("Attempted to remove column from empty grid");
         }
     }
 
-    pub fn make_token(&mut self, mut x: usize, mut y: usize) -> Token {
-        if self.is_rotated() {
-            let tmp = x;
-            x = y;
-            y = tmp;
-        }
-        let master = Rc::new(Cell::new((x, y)));
+    pub fn make_token(&mut self, x: usize, y: usize) -> Token {
+        let master = Rc::new(Cell::new(self.rotate_point((x, y))));
         let position = Rc::downgrade(&master);
-        *self.get_strong_position(x, y) = Some(master);
+        self.points[y][x].pos = Some(master);
         Token { position }
     }
 
@@ -292,13 +282,13 @@ impl<T> Grid<T> {
     }
 
     pub fn trade(&self, token: Token) -> Option<&T> {
-        token.try_get().map(|(x, y)| &self.points[y][x].val)
+        token.try_get().map(|(x, y)| &self.get_internal(x, y).val)
     }
 
     pub fn trade_mut(&mut self, token: Token) -> Option<&mut T> {
         token
             .try_get()
-            .map(move |(x, y)| &mut self.points[y][x].val)
+            .map(move |(x, y)| &mut self.get_mut_internal(x, y).val)
     }
 
     pub fn get_token_adjacent(&self, token: &Token) -> Option<(&T, &T, &T, &T)> {
@@ -314,10 +304,6 @@ impl<T> Grid<T> {
         } else {
             (point.1, point.0)
         }
-    }
-
-    fn get_strong_position(&mut self, x: usize, y: usize) -> &mut Option<StrongPosition> {
-        &mut self.points[y][x].pos
     }
 
     fn convert_container(points: Vec<Vec<T>>) -> Vec<Vec<Item<T>>> {
@@ -336,7 +322,7 @@ impl<T> Grid<T> {
     }
 
     fn get_mut_internal(&mut self, x: usize, y: usize) -> &mut Item<T> {
-        if !self.rotated {
+        if !self.is_rotated() {
             &mut self.points[y][x]
         } else {
             &mut self.points[x][y]
@@ -347,38 +333,34 @@ impl<T> Grid<T> {
 impl<T: Clone> Grid<T> {
     pub fn shift_row_left_from_point(&mut self, x: usize, y: usize) {
         for x in x..(self.width() - 1) {
-            let mut clone = self.get_internal(x + 1, y).clone();
+            let mut clone = self.points[y][x + 1].clone();
             if !self.is_rotated() {
                 clone.update_pos(x, y);
             } else {
                 clone.update_pos(y, x);
             }
-            *self.get_mut_internal(x, y) = clone;
+            self.points[y][x] = clone;
         }
     }
 
     pub fn shift_row_right_from_point(&mut self, x: usize, y: usize) {
         for x in (x + 1..self.width()).rev() {
-            let mut clone = self.get_internal(x - 1, y).clone();
+            let mut clone = self.points[y][x - 1].clone();
             if !self.is_rotated() {
                 clone.update_pos(x, y);
             } else {
                 clone.update_pos(y, x);
             }
-            *self.get_mut_internal(x, y) = clone;
+            self.points[y][x] = clone;
         }
     }
 
     pub fn add_last_column(&mut self) {
-        let expect_msg = "Attempted to get last from empty grid";
-        if self.rotated {
-            let clone = self.points.last().expect(expect_msg).clone();
-            self.points.push(clone);
-        } else {
-            for mut row in self.points.iter_mut() {
-                let clone = row.last().expect(expect_msg).clone();
-                row.push(clone);
-            }
+        for mut row in self.points.iter_mut() {
+            let clone = row.last()
+                .expect("Attempted to get last from empty grid")
+                .clone();
+            row.push(clone);
         }
     }
 
