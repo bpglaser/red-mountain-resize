@@ -80,7 +80,7 @@ impl Carver {
             let pep = {
                 let left = self.grid.get(x, y);
                 let right = self.grid.get(x + 1, y);
-                left.average(&right)
+                left.average(right)
             };
             self.add_point(x, y, pep)
         }
@@ -203,8 +203,9 @@ impl Carver {
     }
 
     fn add_point(&mut self, x: usize, y: usize, pep: PixelEnergyPoint) {
-        self.removed_points
-            .push(self.grid.get(x, y).original_position);
+        self.removed_points.push(
+            self.grid.get(x, y).original_position,
+        );
         self.grid.shift_row_right_from_point(x, y);
         *self.grid.get_mut(x + 1, y) = pep;
     }
@@ -222,8 +223,8 @@ impl Carver {
     }
 
     fn rebuild_image(&self) -> DynamicImage {
-        let mut image = DynamicImage::new_rgba8(self.grid.width() as u32,
-                                                self.grid.height() as u32);
+        let mut image =
+            DynamicImage::new_rgba8(self.grid.width() as u32, self.grid.height() as u32);
         for (x, y, pep) in self.grid.coord_iter() {
             image.put_pixel(x as u32, y as u32, pep.pixel);
         }
@@ -334,17 +335,21 @@ mod tests {
     static MEDIUM: &'static [u8; 244] = include_bytes!("../tests/images/medium_energy.png");
 
     fn get_small_pixel_energy() -> Vec<Vec<u32>> {
-        vec![vec![20808, 52020, 20808],
-             vec![20808, 52225, 21220],
-             vec![20809, 52024, 20809],
-             vec![20808, 52225, 21220]]
+        vec![
+            vec![20808, 52020, 20808],
+            vec![20808, 52225, 21220],
+            vec![20809, 52024, 20809],
+            vec![20808, 52225, 21220],
+        ]
     }
 
     fn get_small_path_energy() -> Vec<Vec<u32>> {
-        vec![vec![20808, 52020, 20808],
-             vec![41616, 73033, 42028],
-             vec![62425, 93640, 62837],
-             vec![83233, 114650, 84057]]
+        vec![
+            vec![20808, 52020, 20808],
+            vec![41616, 73033, 42028],
+            vec![62425, 93640, 62837],
+            vec![83233, 114650, 84057],
+        ]
     }
 
     fn get_small_path() -> Vec<(usize, usize)> {
@@ -352,19 +357,23 @@ mod tests {
     }
 
     fn get_medium_pixel_energy() -> Vec<Vec<u32>> {
-        vec![vec![57685, 50893, 91370, 25418, 33055, 37246],
-             vec![15421, 56334, 22808, 54796, 11641, 25496],
-             vec![12344, 19236, 52030, 17708, 44735, 20663],
-             vec![17074, 23678, 30279, 80663, 37831, 45595],
-             vec![32337, 30796, 4909, 73334, 40613, 36556]]
+        vec![
+            vec![57685, 50893, 91370, 25418, 33055, 37246],
+            vec![15421, 56334, 22808, 54796, 11641, 25496],
+            vec![12344, 19236, 52030, 17708, 44735, 20663],
+            vec![17074, 23678, 30279, 80663, 37831, 45595],
+            vec![32337, 30796, 4909, 73334, 40613, 36556],
+        ]
     }
 
     fn get_medium_path_energy() -> Vec<Vec<u32>> {
-        vec![vec![57685, 50893, 91370, 25418, 33055, 37246],
-             vec![66314, 107227, 48226, 80214, 37059, 58551],
-             vec![78658, 67462, 100256, 54767, 81794, 57722],
-             vec![84536, 91140, 85046, 135430, 92598, 103317],
-             vec![116873, 115332, 89955, 158380, 133211, 129154]]
+        vec![
+            vec![57685, 50893, 91370, 25418, 33055, 37246],
+            vec![66314, 107227, 48226, 80214, 37059, 58551],
+            vec![78658, 67462, 100256, 54767, 81794, 57722],
+            vec![84536, 91140, 85046, 135430, 92598, 103317],
+            vec![116873, 115332, 89955, 158380, 133211, 129154],
+        ]
     }
 
     fn get_medium_path() -> Vec<(usize, usize)> {

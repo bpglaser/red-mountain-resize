@@ -205,56 +205,50 @@ impl<T> Grid<T> {
     }
 
     pub fn iter<'a>(&'a self) -> Box<Iterator<Item = &'a T> + 'a> {
-        Box::new(self.points
-                     .iter()
-                     .flat_map(|row| row.iter())
-                     .map(|item| &item.val))
+        Box::new(self.points.iter().flat_map(|row| row.iter()).map(|item| {
+            &item.val
+        }))
     }
 
     pub fn iter_mut<'a>(&'a mut self) -> Box<Iterator<Item = &'a mut T> + 'a> {
-        Box::new(self.points
-                     .iter_mut()
-                     .flat_map(|row| row.iter_mut())
-                     .map(|item| &mut item.val))
+        Box::new(self.points.iter_mut().flat_map(|row| row.iter_mut()).map(
+            |item| &mut item.val,
+        ))
     }
 
     pub fn coord_iter<'a>(&'a self) -> Box<Iterator<Item = (usize, usize, &'a T)> + 'a> {
         let rotated = self.is_rotated();
-        Box::new(self.points
-                     .iter()
-                     .enumerate()
-                     .flat_map(move |(y, row)| {
-            row.iter()
-                .enumerate()
-                .map(move |(x, item)| if !rotated {
-                         (x, y, &item.val)
-                     } else {
-                         (y, x, &item.val)
-                     })
+        Box::new(self.points.iter().enumerate().flat_map(move |(y, row)| {
+            row.iter().enumerate().map(move |(x, item)| if !rotated {
+                (x, y, &item.val)
+            } else {
+                (y, x, &item.val)
+            })
         }))
     }
 
-    pub fn coord_iter_mut<'a>(&'a mut self)
-                              -> Box<Iterator<Item = (usize, usize, &'a mut T)> + 'a> {
+    pub fn coord_iter_mut<'a>(
+        &'a mut self,
+    ) -> Box<Iterator<Item = (usize, usize, &'a mut T)> + 'a> {
         let rotated = self.is_rotated();
-        Box::new(self.points
-                     .iter_mut()
-                     .enumerate()
-                     .flat_map(move |(y, row)| {
-            row.iter_mut()
-                .enumerate()
-                .map(move |(x, item)| if !rotated {
-                         (x, y, &mut item.val)
-                     } else {
-                         (y, x, &mut item.val)
-                     })
-        }))
+        Box::new(self.points.iter_mut().enumerate().flat_map(
+            move |(y, row)| {
+                row.iter_mut().enumerate().map(
+                    move |(x, item)| if !rotated {
+                        (x, y, &mut item.val)
+                    } else {
+                        (y, x, &mut item.val)
+                    },
+                )
+            },
+        ))
     }
 
     pub fn remove_last_column(&mut self) {
-        for mut row in self.points.iter_mut() {
-            row.pop()
-                .expect("Attempted to remove column from empty grid");
+        for mut row in &mut self.points {
+            row.pop().expect(
+                "Attempted to remove column from empty grid",
+            );
         }
     }
 
@@ -286,16 +280,15 @@ impl<T> Grid<T> {
     }
 
     pub fn trade_mut(&mut self, token: Token) -> Option<&mut T> {
-        token
-            .try_get()
-            .map(move |(x, y)| &mut self.get_mut_internal(x, y).val)
+        token.try_get().map(move |(x, y)| {
+            &mut self.get_mut_internal(x, y).val
+        })
     }
 
     pub fn get_token_adjacent(&self, token: &Token) -> Option<(&T, &T, &T, &T)> {
-        token
-            .try_get()
-            .map(|point| self.rotate_point(point))
-            .map(|(x, y)| self.get_adjacent(x, y))
+        token.try_get().map(|point| self.rotate_point(point)).map(
+            |(x, y)| self.get_adjacent(x, y),
+        )
     }
 
     fn rotate_point(&self, point: (usize, usize)) -> (usize, usize) {
@@ -309,7 +302,9 @@ impl<T> Grid<T> {
     fn convert_container(points: Vec<Vec<T>>) -> Vec<Vec<Item<T>>> {
         points
             .into_iter()
-            .map(|row| row.into_iter().map(|val| Item { val, pos: None }).collect())
+            .map(|row| {
+                row.into_iter().map(|val| Item { val, pos: None }).collect()
+            })
             .collect()
     }
 
@@ -356,7 +351,7 @@ impl<T: Clone> Grid<T> {
     }
 
     pub fn add_last_column(&mut self) {
-        for mut row in self.points.iter_mut() {
+        for mut row in &mut self.points {
             let clone = row.last()
                 .expect("Attempted to get last from empty grid")
                 .clone();
@@ -367,7 +362,7 @@ impl<T: Clone> Grid<T> {
     fn clone_points_without_positions(&self) -> Vec<Vec<Item<T>>> {
         let mut rows = vec![];
         for row in &self.points {
-            let new_row = row.iter().map(|ref item| item.clone_unindexed()).collect();
+            let new_row = row.iter().map(|item| item.clone_unindexed()).collect();
             rows.push(new_row);
         }
         rows

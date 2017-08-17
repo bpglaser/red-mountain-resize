@@ -10,43 +10,55 @@ pub fn parse_args() -> BoxResult<Config> {
     let matches = App::new("Red Mountain Resize")
         .version(crate_version!())
         .author("Brad Glaser <bpglaser@gmail.com>")
-        .arg(Arg::with_name("width")
-                 .short("w")
-                 .long("width")
-                 .value_name("WIDTH")
-                 .takes_value(true)
-                 .validator(validate_dist)
-                 .allow_hyphen_values(true))
-        .arg(Arg::with_name("height")
-                 .short("h")
-                 .long("height")
-                 .value_name("HEIGHT")
-                 .takes_value(true)
-                 .validator(validate_dist)
-                 .allow_hyphen_values(true))
-        .arg(Arg::with_name("dimensions")
-                 .short("d")
-                 .long("dimensions")
-                 .conflicts_with_all(&["width", "height"])
-                 .required_unless_one(&["width", "height"])
-                 .value_name("WIDTHxHEIGHT")
-                 .takes_value(true)
-                 .number_of_values(2)
-                 .validator(validate_dimension)
-                 .value_delimiter("x"))
-        .arg(Arg::with_name("debug_path")
-                 .long("debug")
-                 .value_name("DEBUG_PATH")
-                 .takes_value(true))
-        .arg(Arg::with_name("input_path")
-                 .required(true)
-                 .value_name("INPUT_PATH")
-                 .takes_value(true))
-        .arg(Arg::with_name("output_path")
-                 .required(false)
-                 .value_name("OUTPUT_PATH")
-                 .takes_value(true)
-                 .validator(validate_extension))
+        .arg(
+            Arg::with_name("width")
+                .short("w")
+                .long("width")
+                .value_name("WIDTH")
+                .takes_value(true)
+                .validator(validate_dist)
+                .allow_hyphen_values(true),
+        )
+        .arg(
+            Arg::with_name("height")
+                .short("h")
+                .long("height")
+                .value_name("HEIGHT")
+                .takes_value(true)
+                .validator(validate_dist)
+                .allow_hyphen_values(true),
+        )
+        .arg(
+            Arg::with_name("dimensions")
+                .short("d")
+                .long("dimensions")
+                .conflicts_with_all(&["width", "height"])
+                .required_unless_one(&["width", "height"])
+                .value_name("WIDTHxHEIGHT")
+                .takes_value(true)
+                .number_of_values(2)
+                .validator(validate_dimension)
+                .value_delimiter("x"),
+        )
+        .arg(
+            Arg::with_name("debug_path")
+                .long("debug")
+                .value_name("DEBUG_PATH")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("input_path")
+                .required(true)
+                .value_name("INPUT_PATH")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("output_path")
+                .required(false)
+                .value_name("OUTPUT_PATH")
+                .takes_value(true)
+                .validator(validate_extension),
+        )
         .arg(Arg::with_name("time").short("t").long("time"))
         .get_matches();
 
@@ -92,7 +104,7 @@ pub struct Config {
 impl Config {
     pub fn get_output_path(&mut self) -> &Path {
         match self.output_path {
-            Some(ref output_path) => &output_path,
+            Some(ref output_path) => output_path,
             None => self.get_default_path(),
         }
     }
@@ -121,23 +133,23 @@ impl Config {
         let width = matches.value_of("width").and_then(|s| s.parse().ok());
         let height = matches.value_of("height").and_then(|s| s.parse().ok());
 
-        let dimensions = matches
-            .values_of("dimensions")
-            .map(Config::parse_dimensions);
+        let dimensions = matches.values_of("dimensions").map(
+            Config::parse_dimensions,
+        );
 
         let debug_path = matches.value_of("debug_path").map(|s| s.into());
 
         let time = matches.is_present("time");
 
         Ok(Config {
-               input_path,
-               output_path,
-               width,
-               height,
-               dimensions,
-               debug_path,
-               time,
-           })
+            input_path,
+            output_path,
+            width,
+            height,
+            dimensions,
+            debug_path,
+            time,
+        })
     }
 
     fn parse_dimensions(mut values: Values) -> (usize, usize) {
@@ -169,8 +181,9 @@ pub fn get_format<P: AsRef<Path>>(path: P) -> Result<ImageFormat, String> {
 }
 
 fn get_extension<P: AsRef<Path>>(path: P) -> Option<String> {
-    path.as_ref()
-        .extension()
-        .and_then(|s| s.to_str())
-        .map(|s| s.to_lowercase())
+    path.as_ref().extension().and_then(|s| s.to_str()).map(
+        |s| {
+            s.to_lowercase()
+        },
+    )
 }

@@ -70,8 +70,10 @@ impl From<Rgba<u8>> for PixelEnergyPoint {
 }
 
 fn average_pixel_data(pixel1: &[u8; 4], pixel2: &[u8; 4]) -> [u8; 4] {
-    [((pixel1[0] as u16 + pixel2[0] as u16) / 2) as u8,
-     ((pixel1[1] as u16 + pixel2[1] as u16) / 2) as u8,
-     ((pixel1[2] as u16 + pixel2[2] as u16) / 2) as u8,
-     ((pixel1[3] as u16 + pixel2[3] as u16) / 2) as u8]
+    [
+        ((pixel1[0] as u16 + pixel2[0] as u16) / 2) as u8,
+        ((pixel1[1] as u16 + pixel2[1] as u16) / 2) as u8,
+        ((pixel1[2] as u16 + pixel2[2] as u16) / 2) as u8,
+        ((pixel1[3] as u16 + pixel2[3] as u16) / 2) as u8,
+    ]
 }

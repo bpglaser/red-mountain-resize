@@ -69,8 +69,20 @@ fn grid_iter_mut_test() {
     let mut grid = make_test_grid();
 
     let collection: Vec<_> = grid.iter_mut().collect();
-    assert_eq!(vec![&mut 0, &mut 1, &mut 2, &mut 3, &mut 4, &mut 5, &mut 6, &mut 7, &mut 8],
-               collection);
+    assert_eq!(
+        vec![
+            &mut 0,
+            &mut 1,
+            &mut 2,
+            &mut 3,
+            &mut 4,
+            &mut 5,
+            &mut 6,
+            &mut 7,
+            &mut 8,
+        ],
+        collection
+    );
 }
 
 #[test]
@@ -212,14 +224,18 @@ fn grid_iter_parents_test() {
 
     // Second row
     assert_eq!(vec![&0, &1], grid.iter_parents(0, 1).collect::<Vec<_>>());
-    assert_eq!(vec![&0, &1, &2],
-               grid.iter_parents(1, 1).collect::<Vec<_>>());
+    assert_eq!(
+        vec![&0, &1, &2],
+        grid.iter_parents(1, 1).collect::<Vec<_>>()
+    );
     assert_eq!(vec![&1, &2], grid.iter_parents(2, 1).collect::<Vec<_>>());
 
     // Third row
     assert_eq!(vec![&3, &4], grid.iter_parents(0, 2).collect::<Vec<_>>());
-    assert_eq!(vec![&3, &4, &5],
-               grid.iter_parents(1, 2).collect::<Vec<_>>());
+    assert_eq!(
+        vec![&3, &4, &5],
+        grid.iter_parents(1, 2).collect::<Vec<_>>()
+    );
     assert_eq!(vec![&4, &5], grid.iter_parents(2, 2).collect::<Vec<_>>());
 }
 
@@ -234,14 +250,18 @@ fn grid_get_parents_indexed_test() {
 
     // Second row
     assert_eq!(vec![(0, 0, &0), (1, 0, &1)], grid.get_parents_indexed(0, 1));
-    assert_eq!(vec![(0, 0, &0), (1, 0, &1), (2, 0, &2)],
-               grid.get_parents_indexed(1, 1));
+    assert_eq!(
+        vec![(0, 0, &0), (1, 0, &1), (2, 0, &2)],
+        grid.get_parents_indexed(1, 1)
+    );
     assert_eq!(vec![(1, 0, &1), (2, 0, &2)], grid.get_parents_indexed(2, 1));
 
     // Third row
     assert_eq!(vec![(0, 1, &3), (1, 1, &4)], grid.get_parents_indexed(0, 2));
-    assert_eq!(vec![(0, 1, &3), (1, 1, &4), (2, 1, &5)],
-               grid.get_parents_indexed(1, 2));
+    assert_eq!(
+        vec![(0, 1, &3), (1, 1, &4), (2, 1, &5)],
+        grid.get_parents_indexed(1, 2)
+    );
     assert_eq!(vec![(1, 1, &4), (2, 1, &5)], grid.get_parents_indexed(2, 2));
 }
 
@@ -264,16 +284,22 @@ fn grid_get_row_with_coords_test() {
     let grid = make_test_grid();
 
     // First row
-    assert_eq!(vec![(0, 0, &0), (1, 0, &1), (2, 0, &2)],
-               grid.get_row_with_coords(0));
+    assert_eq!(
+        vec![(0, 0, &0), (1, 0, &1), (2, 0, &2)],
+        grid.get_row_with_coords(0)
+    );
 
     // Second row
-    assert_eq!(vec![(0, 1, &3), (1, 1, &4), (2, 1, &5)],
-               grid.get_row_with_coords(1));
+    assert_eq!(
+        vec![(0, 1, &3), (1, 1, &4), (2, 1, &5)],
+        grid.get_row_with_coords(1)
+    );
 
     // Third row
-    assert_eq!(vec![(0, 2, &6), (1, 2, &7), (2, 2, &8)],
-               grid.get_row_with_coords(2));
+    assert_eq!(
+        vec![(0, 2, &6), (1, 2, &7), (2, 2, &8)],
+        grid.get_row_with_coords(2)
+    );
 }
 
 #[test]
@@ -543,8 +569,20 @@ fn grid_rotation_iter_mut_test() {
     grid.rotate();
 
     let collection: Vec<_> = grid.iter_mut().collect();
-    assert_eq!(vec![&mut 0, &mut 3, &mut 6, &mut 1, &mut 4, &mut 7, &mut 2, &mut 5, &mut 8],
-               collection);
+    assert_eq!(
+        vec![
+            &mut 0,
+            &mut 3,
+            &mut 6,
+            &mut 1,
+            &mut 4,
+            &mut 7,
+            &mut 2,
+            &mut 5,
+            &mut 8,
+        ],
+        collection
+    );
 }
 
 #[test]
