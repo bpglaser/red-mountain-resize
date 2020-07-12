@@ -8,4 +8,4 @@ pub mod config;
 pub mod energy;
 pub mod grid;
 
-pub type BoxResult<T> = Result<T, Box<std::error::Error>>;
+pub type BoxResult<T> = Result<T, Box<dyn std::error::Error>>;
