@@ -2,6 +2,7 @@
 name = "rmr"
 version = "0.3.0"
 authors = ["bpglaser <bpglaser@gmail.com>"]
+edition = "2018"
 
 [[bin]]
 name = "rmr"

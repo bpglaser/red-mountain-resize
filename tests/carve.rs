@@ -1,6 +1,3 @@
-extern crate image;
-extern crate rmr;
-
 use image::{DynamicImage, GenericImage, ImageFormat};
 
 use rmr::carve::Carver;
@@ -21,7 +18,9 @@ macro_rules! test_carve {
         let target = load($target);
         if let Err(msg) = compare_images(&target, &output) {
             let filename = format!("{}.png", stringify!($target));
-            output.save(&mut File::create(&filename).unwrap(), ImageFormat::PNG).unwrap();
+            output
+                .save(&mut File::create(&filename).unwrap(), ImageFormat::PNG)
+                .unwrap();
             panic!("{} Saved to: {}", msg, filename);
         }
     };

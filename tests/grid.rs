@@ -1,5 +1,3 @@
-extern crate rmr;
-
 use rmr::grid::Grid;
 
 // Test grid visualized:
@@ -70,17 +68,7 @@ fn grid_iter_mut_test() {
 
     let collection: Vec<_> = grid.iter_mut().collect();
     assert_eq!(
-        vec![
-            &mut 0,
-            &mut 1,
-            &mut 2,
-            &mut 3,
-            &mut 4,
-            &mut 5,
-            &mut 6,
-            &mut 7,
-            &mut 8,
-        ],
+        vec![&mut 0, &mut 1, &mut 2, &mut 3, &mut 4, &mut 5, &mut 6, &mut 7, &mut 8,],
         collection
     );
 }
@@ -570,17 +558,7 @@ fn grid_rotation_iter_mut_test() {
 
     let collection: Vec<_> = grid.iter_mut().collect();
     assert_eq!(
-        vec![
-            &mut 0,
-            &mut 3,
-            &mut 6,
-            &mut 1,
-            &mut 4,
-            &mut 7,
-            &mut 2,
-            &mut 5,
-            &mut 8,
-        ],
+        vec![&mut 0, &mut 3, &mut 6, &mut 1, &mut 4, &mut 7, &mut 2, &mut 5, &mut 8,],
         collection
     );
 }

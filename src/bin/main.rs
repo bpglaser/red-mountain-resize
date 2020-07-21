@@ -1,15 +1,12 @@
-extern crate image;
-extern crate rmr;
-
 use std::fs::File;
 use std::path::Path;
 use std::time::Instant;
 
 use image::{DynamicImage, GenericImage, Rgba};
 
-use rmr::BoxResult;
 use rmr::carve::Carver;
-use rmr::config::{Config, get_format, parse_args};
+use rmr::config::{get_format, parse_args, Config};
+use rmr::BoxResult;
 
 fn main() {
     parse_args().and_then(run).unwrap()
@@ -81,7 +78,9 @@ fn save_image_to_path<P: AsRef<Path>>(image: &DynamicImage, path: P) -> BoxResul
 }
 
 fn create_debug_image(image: &DynamicImage, points: &[(usize, usize)]) -> DynamicImage {
-    let red_pixel = Rgba { data: [255, 0, 0, 255] };
+    let red_pixel = Rgba {
+        data: [255, 0, 0, 255],
+    };
     let mut image = image.clone();
     for &(x, y) in points {
         image.put_pixel(x as u32, y as u32, red_pixel);

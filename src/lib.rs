@@ -1,7 +1,5 @@
 #[macro_use]
 extern crate clap;
-extern crate image;
-extern crate num_traits;
 
 pub mod carve;
 pub mod config;

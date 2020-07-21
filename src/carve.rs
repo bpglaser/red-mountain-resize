@@ -2,8 +2,8 @@ use std::mem;
 
 use image::{DynamicImage, GenericImage};
 
-use energy::PixelEnergyPoint;
-use grid::{Grid, Token};
+use crate::energy::PixelEnergyPoint;
+use crate::grid::{Grid, Token};
 
 #[derive(Clone)]
 pub struct Carver {
@@ -128,7 +128,8 @@ impl Carver {
 
     fn get_path_start(&self) -> (usize, usize) {
         let y = self.grid.height() - 1;
-        let (x, _) = self.grid
+        let (x, _) = self
+            .grid
             .get_row(y)
             .into_iter()
             .enumerate()
@@ -203,9 +204,8 @@ impl Carver {
     }
 
     fn add_point(&mut self, x: usize, y: usize, pep: PixelEnergyPoint) {
-        self.removed_points.push(
-            self.grid.get(x, y).original_position,
-        );
+        self.removed_points
+            .push(self.grid.get(x, y).original_position);
         self.grid.shift_row_right_from_point(x, y);
         *self.grid.get_mut(x + 1, y) = pep;
     }
@@ -260,19 +260,17 @@ impl Carver {
 
 #[cfg(test)]
 mod tests {
-    use image;
     use super::Carver;
+    use image;
 
     macro_rules! setup_carver {
-        ( $bytes:expr ) => {
-            {
-                let input = image::load_from_memory($bytes).unwrap();
-                let mut carver = Carver::new(&input);
-                carver.calculate_all_pixel_energy();
-                carver.calculate_energy();
-                carver
-            }
-        };
+        ( $bytes:expr ) => {{
+            let input = image::load_from_memory($bytes).unwrap();
+            let mut carver = Carver::new(&input);
+            carver.calculate_all_pixel_energy();
+            carver.calculate_energy();
+            carver
+        }};
     }
 
     #[test]

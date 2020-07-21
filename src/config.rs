@@ -4,7 +4,7 @@ use clap::{App, Arg, ArgMatches, Values};
 
 use image::ImageFormat;
 
-use BoxResult;
+use crate::BoxResult;
 
 pub fn parse_args() -> BoxResult<Config> {
     let matches = App::new("Red Mountain Resize")
@@ -133,9 +133,9 @@ impl Config {
         let width = matches.value_of("width").and_then(|s| s.parse().ok());
         let height = matches.value_of("height").and_then(|s| s.parse().ok());
 
-        let dimensions = matches.values_of("dimensions").map(
-            Config::parse_dimensions,
-        );
+        let dimensions = matches
+            .values_of("dimensions")
+            .map(Config::parse_dimensions);
 
         let debug_path = matches.value_of("debug_path").map(|s| s.into());
 
@@ -161,29 +161,26 @@ impl Config {
 
 pub fn get_format<P: AsRef<Path>>(path: P) -> Result<ImageFormat, String> {
     match get_extension(&path) {
-        Some(extension) => {
-            match extension.as_str() {
-                "png" => Ok(ImageFormat::PNG),
-                "jpg" | "jpeg" => Ok(ImageFormat::JPEG),
-                "gif" => Ok(ImageFormat::GIF),
-                "webp" => Ok(ImageFormat::WEBP),
-                "ppm" => Ok(ImageFormat::PPM),
-                "tif" | "tiff" => Ok(ImageFormat::TIFF),
-                "tga" => Ok(ImageFormat::TGA),
-                "bmp" => Ok(ImageFormat::BMP),
-                "ico" => Ok(ImageFormat::ICO),
-                "hdr" => Ok(ImageFormat::HDR),
-                _ => Err("Invalid file extension".to_owned()),
-            }
-        }
+        Some(extension) => match extension.as_str() {
+            "png" => Ok(ImageFormat::PNG),
+            "jpg" | "jpeg" => Ok(ImageFormat::JPEG),
+            "gif" => Ok(ImageFormat::GIF),
+            "webp" => Ok(ImageFormat::WEBP),
+            "ppm" => Ok(ImageFormat::PPM),
+            "tif" | "tiff" => Ok(ImageFormat::TIFF),
+            "tga" => Ok(ImageFormat::TGA),
+            "bmp" => Ok(ImageFormat::BMP),
+            "ico" => Ok(ImageFormat::ICO),
+            "hdr" => Ok(ImageFormat::HDR),
+            _ => Err("Invalid file extension".to_owned()),
+        },
         None => Err("No file extension given.".to_owned()),
     }
 }
 
 fn get_extension<P: AsRef<Path>>(path: P) -> Option<String> {
-    path.as_ref().extension().and_then(|s| s.to_str()).map(
-        |s| {
-            s.to_lowercase()
-        },
-    )
+    path.as_ref()
+        .extension()
+        .and_then(|s| s.to_str())
+        .map(|s| s.to_lowercase())
 }
