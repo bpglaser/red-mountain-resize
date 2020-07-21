@@ -1,7 +1,5 @@
 use image::{Pixel, Rgba};
 
-use num_traits::ToPrimitive;
-
 #[derive(Clone, Debug)]
 pub struct PixelEnergyPoint {
     pub pixel: Rgba<u8>,
@@ -41,8 +39,8 @@ impl PixelEnergyPoint {
         let mut sum = 0;
         for i in 0..pixel1_channels.len() {
             // Values are cast to u32 to prevent overflow when summing
-            let a = pixel1_channels[i].to_u32().unwrap();
-            let b = pixel2_channels[i].to_u32().unwrap();
+            let a: u32 = pixel1_channels[i].into();
+            let b: u32 = pixel2_channels[i].into();
             if a >= b {
                 sum += (a - b).pow(2);
             } else {
