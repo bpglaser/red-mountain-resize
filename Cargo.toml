@@ -5,6 +5,7 @@ authors = ["bpglaser <bpglaser@gmail.com>"]
 
 [[bin]]
 name = "rmr"
+path = "src/bin/main.rs"
 doc = false
 
 [dependencies]

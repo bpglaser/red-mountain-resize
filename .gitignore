@@ -3,3 +3,5 @@
 *.jpg
 *.png
 *.rs.bk
+
+.DS_Store

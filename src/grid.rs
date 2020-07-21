@@ -204,19 +204,19 @@ impl<T> Grid<T> {
         self.rotated
     }
 
-    pub fn iter<'a>(&'a self) -> Box<Iterator<Item = &'a T> + 'a> {
+    pub fn iter<'a>(&'a self) -> Box<dyn Iterator<Item = &'a T> + 'a> {
         Box::new(self.points.iter().flat_map(|row| row.iter()).map(|item| {
             &item.val
         }))
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> Box<Iterator<Item = &'a mut T> + 'a> {
+    pub fn iter_mut<'a>(&'a mut self) -> Box<dyn Iterator<Item = &'a mut T> + 'a> {
         Box::new(self.points.iter_mut().flat_map(|row| row.iter_mut()).map(
             |item| &mut item.val,
         ))
     }
 
-    pub fn coord_iter<'a>(&'a self) -> Box<Iterator<Item = (usize, usize, &'a T)> + 'a> {
+    pub fn coord_iter<'a>(&'a self) -> Box<dyn Iterator<Item = (usize, usize, &'a T)> + 'a> {
         let rotated = self.is_rotated();
         Box::new(self.points.iter().enumerate().flat_map(move |(y, row)| {
             row.iter().enumerate().map(move |(x, item)| if !rotated {
@@ -229,7 +229,7 @@ impl<T> Grid<T> {
 
     pub fn coord_iter_mut<'a>(
         &'a mut self,
-    ) -> Box<Iterator<Item = (usize, usize, &'a mut T)> + 'a> {
+    ) -> Box<dyn Iterator<Item = (usize, usize, &'a mut T)> + 'a> {
         let rotated = self.is_rotated();
         Box::new(self.points.iter_mut().enumerate().flat_map(
             move |(y, row)| {
@@ -245,7 +245,7 @@ impl<T> Grid<T> {
     }
 
     pub fn remove_last_column(&mut self) {
-        for mut row in &mut self.points {
+        for row in &mut self.points {
             row.pop().expect(
                 "Attempted to remove column from empty grid",
             );
@@ -351,7 +351,7 @@ impl<T: Clone> Grid<T> {
     }
 
     pub fn add_last_column(&mut self) {
-        for mut row in &mut self.points {
+        for row in &mut self.points {
             let clone = row.last()
                 .expect("Attempted to get last from empty grid")
                 .clone();
