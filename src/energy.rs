@@ -21,14 +21,14 @@ impl PixelEnergyPoint {
     /// # use image::Rgba;
     /// # use rmr::energy::PixelEnergyPoint;
     /// # fn main() {
-    /// let a: PixelEnergyPoint = Rgba { data: [255, 203, 51, 255] }.into();
-    /// let b: PixelEnergyPoint = Rgba { data: [255, 205, 255, 255] }.into();
+    /// let a: PixelEnergyPoint = Rgba([255, 203, 51, 255]).into();
+    /// let b: PixelEnergyPoint = Rgba([255, 205, 255, 255]).into();
     ///
     /// let result = a.square_gradient(&b);
     /// assert_eq!(41620, result);
     ///
-    /// let a: PixelEnergyPoint = Rgba { data: [255, 255, 153, 255] }.into();
-    /// let b: PixelEnergyPoint = Rgba { data: [255, 153, 153, 255] }.into();
+    /// let a: PixelEnergyPoint = Rgba([255, 255, 153, 255]).into();
+    /// let b: PixelEnergyPoint = Rgba([255, 153, 153, 255]).into();
     ///
     /// let result = a.square_gradient(&b);
     /// assert_eq!(10404, result);
@@ -53,8 +53,8 @@ impl PixelEnergyPoint {
     }
 
     pub fn average(&self, other: &PixelEnergyPoint) -> PixelEnergyPoint {
-        let data = average_pixel_data(&self.pixel.data, &other.pixel.data);
-        Rgba { data }.into()
+        let data = average_pixel_data(&self.pixel.0, &other.pixel.0);
+        Rgba(data).into()
     }
 }
 

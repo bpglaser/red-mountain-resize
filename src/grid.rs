@@ -1,7 +1,7 @@
 use std::cell::Cell;
 use std::rc::{Rc, Weak};
 
-use image::{DynamicImage, GenericImage};
+use image::{DynamicImage, GenericImageView};
 
 use crate::energy::PixelEnergyPoint;
 

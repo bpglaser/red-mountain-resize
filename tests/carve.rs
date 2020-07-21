@@ -1,8 +1,6 @@
-use image::{DynamicImage, GenericImage, ImageFormat};
+use image::{DynamicImage, GenericImageView};
 
 use rmr::carve::Carver;
-
-use std::fs::File;
 
 macro_rules! test_carve {
     ( $target:expr, $dw:expr, $dh:expr ) => {
@@ -19,7 +17,7 @@ macro_rules! test_carve {
         if let Err(msg) = compare_images(&target, &output) {
             let filename = format!("{}.png", stringify!($target));
             output
-                .save(&mut File::create(&filename).unwrap(), ImageFormat::PNG)
+                .save(&filename)
                 .unwrap();
             panic!("{} Saved to: {}", msg, filename);
         }
