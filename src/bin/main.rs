@@ -1,14 +1,17 @@
 use std::path::Path;
 use std::time::Instant;
 
+use clap::Parser;
 use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
 
 use rmr::carve::Carver;
-use rmr::config::{parse_args, Config};
+use rmr::config::Config;
 use rmr::BoxResult;
 
-fn main() {
-    parse_args().and_then(run).unwrap()
+fn main() -> BoxResult<()> {
+    let cfg = Config::parse();
+    run(cfg)?;
+    Ok(())
 }
 
 fn run(mut config: Config) -> BoxResult<()> {
