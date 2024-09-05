@@ -31,33 +31,41 @@ impl Carver {
         self.calculate_all_pixel_energy();
         let mut width_changed = false;
 
-        if width > initial_width {
-            self.grow_distance(width - initial_width);
-            width_changed = true;
-        } else if width < initial_width {
-            self.shrink_distance(initial_width - width);
-            width_changed = true;
+        match width.cmp(&initial_height) {
+            std::cmp::Ordering::Equal => {}
+            std::cmp::Ordering::Greater => {
+                self.grow_distance(width - initial_width);
+                width_changed = true;
+            }
+            std::cmp::Ordering::Less => {
+                self.shrink_distance(initial_width - width);
+                width_changed = true;
+            }
         }
 
         if width_changed && height != initial_height {
             self.calculate_all_pixel_energy();
         }
 
-        if height > initial_height {
-            self.grid.rotate();
-            self.grow_distance(height - initial_height);
-            self.grid.rotate();
-        } else if height < initial_height {
-            self.grid.rotate();
-            self.shrink_distance(initial_height - height);
-            self.grid.rotate();
+        match height.cmp(&initial_height) {
+            std::cmp::Ordering::Equal => {}
+            std::cmp::Ordering::Greater => {
+                self.grid.rotate();
+                self.grow_distance(height - initial_height);
+                self.grid.rotate();
+            }
+            std::cmp::Ordering::Less => {
+                self.grid.rotate();
+                self.shrink_distance(initial_height - height);
+                self.grid.rotate();
+            }
         }
 
         self.rebuild_image()
     }
 
-    pub fn get_removed_points(self) -> Vec<(usize, usize)> {
-        self.removed_points
+    pub fn get_removed_points(&self) -> &[(usize, usize)] {
+        &self.removed_points
     }
 
     fn shrink_distance(&mut self, distance: usize) {
@@ -157,7 +165,7 @@ impl Carver {
         shrinker.reset_positions();
 
         shrinker.shrink_distance(distance);
-        let mut points = shrinker.get_removed_points();
+        let mut points = shrinker.get_removed_points().to_vec();
 
         // Reverse sort by x values
         points.sort_by(|a, b| b.0.cmp(&a.0));

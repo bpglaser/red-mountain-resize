@@ -10,7 +10,10 @@ path = "src/bin/main.rs"
 doc = false
 
 [dependencies]
+anyhow = "1.0.86"
 image = "0.25.2"
+log = "0.4.22"
+pretty_env_logger = "0.5.0"
 
 [dependencies.clap]
 version = "4.5.16"

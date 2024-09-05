@@ -1,87 +1,111 @@
+use std::borrow::Cow;
+use std::cell::RefCell;
 use std::path::Path;
-use std::time::Instant;
+use std::rc::Rc;
 
+use anyhow::{bail, Ok, Result};
 use clap::Parser;
-use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
+use image::{DynamicImage, GenericImageView};
 
 use rmr::carve::Carver;
+use rmr::change::Change;
 use rmr::config::Config;
-use rmr::BoxResult;
+use rmr::debug::create_debug_image;
 
-fn main() -> BoxResult<()> {
+fn main() -> Result<()> {
+    pretty_env_logger::init();
     let cfg = Config::parse();
     run(cfg)?;
     Ok(())
 }
 
-fn run(mut config: Config) -> BoxResult<()> {
+fn run(mut config: Config) -> Result<()> {
+    log::info!("loading: {:?}", &config.input_path);
     let mut image = image::open(&config.input_path)?;
-    let mut carver = Carver::new(&image);
+    let carver = Rc::new(RefCell::new(Carver::new(&image)));
 
-    let (width, height) = get_target_dimensions(&image, &config);
+    let dimensions = get_target_dimensions(&image, &config)?;
+    log::info!(
+        "target dimensions [{}]",
+        dimensions
+            .clone()
+            .iter()
+            .map(|dim| format!("{:?}", dim))
+            .collect::<Vec<_>>()
+            .join(", ")
+    );
+    for (width, height) in dimensions.iter().cloned() {
+        log::info!("cloning carver");
+        let carver = carver.clone();
+        log::info!("resizing to: {:?}", (width, height));
+        let scaled_image = carver.borrow_mut().resize(width, height);
+        log::info!("finished resizing");
 
-    let time_start = if config.time {
-        Some(Instant::now())
-    } else {
-        None
-    };
+        let mut suffix = Cow::Borrowed("");
+        if dimensions.len() > 1 {
+            suffix = format!("{:?}", (width, height)).into();
+        }
+        let path = config.get_output_path(&suffix);
+        log::info!("saving output image");
+        save_image_to_path(&scaled_image, path)?;
 
-    let scaled_image = carver.resize(width, height);
-
-    if let Some(time_start) = time_start {
-        let duration = time_start.elapsed();
-        let secs = duration.as_secs();
-        let nanos = duration.subsec_nanos();
-        println!("Resizing image took: {}.{}", secs, nanos);
-    }
-
-    save_image_to_path(&scaled_image, config.get_output_path())?;
-
-    if let Some(debug_path) = config.debug_path {
-        let debug_image = create_debug_image(&mut image, &carver.get_removed_points());
-        save_image_to_path(&debug_image, debug_path)?;
+        if let Some(debug_path) = &config.debug_path {
+            let debug_image = create_debug_image(&mut image, carver.borrow().get_removed_points());
+            log::info!("saving debug image");
+            save_image_to_path(&debug_image, debug_path)?;
+        }
     }
 
     Ok(())
 }
 
-fn get_target_dimensions(image: &DynamicImage, config: &Config) -> (usize, usize) {
-    if let Some(dimensions) = config.dimensions {
-        return dimensions;
-    }
-
+fn get_target_dimensions(image: &DynamicImage, config: &Config) -> Result<Vec<(usize, usize)>> {
     let (width, height) = image.dimensions();
-    let (mut width, mut height) = (width as usize, height as usize);
+    let dims @ (width, height) = (width as usize, height as usize);
 
-    if let Some(delta_width) = config.width {
-        if delta_width >= 0 {
-            width += delta_width as usize;
-        } else {
-            width -= delta_width.abs() as usize;
-        }
+    if let Some(dimensions) = &config.dimensions {
+        return collect_both_dimensions(&dimensions.0, &dimensions.1, dims);
     }
 
-    if let Some(delta_height) = config.height {
-        if delta_height >= 0 {
-            height += delta_height as usize;
-        } else {
-            height -= delta_height.abs() as usize;
+    match (&config.width, &config.height) {
+        (None, None) => bail!("no resize dimensions specified"),
+        (None, Some(height_change)) => Ok(height_change
+            .to_absolutes(height)?
+            .into_iter()
+            .map(|h| (width, h))
+            .collect()),
+        (Some(width_change), None) => Ok(width_change
+            .to_absolutes(width)?
+            .into_iter()
+            .map(|w| (w, height))
+            .collect()),
+        (Some(width_change), Some(height_change)) => {
+            collect_both_dimensions(width_change, height_change, dims)
         }
     }
-
-    (width, height)
 }
 
-fn save_image_to_path<P: AsRef<Path>>(image: &DynamicImage, path: P) -> BoxResult<()> {
+fn collect_both_dimensions(
+    width_change: &Change,
+    height_change: &Change,
+    (width, height): (usize, usize),
+) -> Result<Vec<(usize, usize)>> {
+    let mut res = vec![];
+    for w in width_change.to_absolutes(width)? {
+        for h in height_change.to_absolutes(height)? {
+            res.push((w, h));
+        }
+    }
+    Ok(res)
+}
+
+fn save_image_to_path<P: AsRef<Path>>(image: &DynamicImage, path: P) -> Result<()> {
+    let path = path.as_ref();
+    log::info!(
+        "saving image of size {:?} to {:?}",
+        image.dimensions(),
+        path
+    );
     image.save(path)?;
     Ok(())
-}
-
-fn create_debug_image(image: &mut DynamicImage, points: &[(usize, usize)]) -> DynamicImage {
-    let red_pixel = Rgba([255, 0, 0, 255]);
-    let mut image = image.clone();
-    for &(x, y) in points {
-        image.put_pixel(x as u32, y as u32, red_pixel);
-    }
-    image
 }
