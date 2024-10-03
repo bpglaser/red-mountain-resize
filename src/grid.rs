@@ -114,51 +114,16 @@ impl<T> Grid<T> {
         parents
     }
 
-    pub fn iter_parents(&self, mut x: usize, mut y: usize) -> ParentIter<T> {
-        let remaining;
-        if y == 0 {
-            remaining = 0;
-        } else {
-            y -= 1;
-            if x == 0 {
-                remaining = 2;
-            } else if x == self.width() - 1 {
-                x -= 1;
-                remaining = 2;
-            } else {
-                x -= 1;
-                remaining = 3;
-            }
-        }
-
-        ParentIter {
-            x,
-            y,
-            remaining,
-            grid: self,
-        }
+    pub fn iter_parents(&self, x: usize, y: usize) -> impl Iterator<Item = &T> {
+        self.iter_parents_with_coords(x, y).map(|(_, item)| item)
     }
 
-    pub fn get_parents_indexed(&self, x: usize, y: usize) -> Vec<(usize, usize, &T)> {
-        let mut parents = vec![];
-
-        if y > 0 {
-            if x > 0 {
-                parents.push((x - 1, y - 1, self.get(x - 1, y - 1)));
-            }
-
-            parents.push((x, y - 1, self.get(x, y - 1)));
-
-            if x < self.width() - 1 {
-                parents.push((x + 1, y - 1, self.get(x + 1, y - 1)));
-            }
-        }
-
-        parents
+    pub fn get_parents_indexed(&self, x: usize, y: usize) -> Vec<((usize, usize), &T)> {
+        self.iter_parents_with_coords(x, y).collect()
     }
 
-    pub fn iter_parents_with_coords(&self, x: usize, y: usize) -> ParentCoordIter<T> {
-        self.iter_parents(x, y).coordinate()
+    pub fn iter_parents_with_coords(&self, x: usize, y: usize) -> ParentIter<T> {
+        ParentIter::new(self, x, y)
     }
 
     pub fn get_row(&self, y: usize) -> Vec<&T> {
@@ -410,44 +375,77 @@ impl<'a> From<&'a DynamicImage> for Grid<PixelEnergyPoint> {
     }
 }
 
-pub struct ParentIter<'a, T: 'a> {
-    x: usize,
-    y: usize,
-    remaining: u32,
-    grid: &'a Grid<T>,
+pub enum ParentIter<'grid, T: 'grid> {
+    Done,
+    Right {
+        x: usize,
+        y: usize,
+        grid: &'grid Grid<T>,
+    },
+    Middle {
+        x: usize,
+        y: usize,
+        grid: &'grid Grid<T>,
+    },
+    Left {
+        x: usize,
+        y: usize,
+        grid: &'grid Grid<T>,
+    },
 }
 
-impl<'a, T> ParentIter<'a, T> {
-    fn coordinate(self) -> ParentCoordIter<'a, T> {
-        ParentCoordIter { inner: self }
-    }
-}
-
-impl<'a, T> Iterator for ParentIter<'a, T> {
-    type Item = &'a T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.remaining > 0 {
-            let result = Some(self.grid.get(self.x, self.y));
-            self.x += 1;
-            self.remaining -= 1;
-            result
-        } else {
-            None
+impl<'grid, T> ParentIter<'grid, T> {
+    fn new(grid: &'grid Grid<T>, mut x: usize, mut y: usize) -> Self {
+        if y == 0 {
+            // We can't move up. We're already done.
+            return ParentIter::Done;
         }
+        // Move up.
+        y -= 1;
+        if x == 0 {
+            // We can't move left. So this cell only has two parents.
+            return ParentIter::Middle { x, y, grid };
+        }
+        // Move left.
+        x -= 1;
+        ParentIter::Left { x, y, grid }
     }
 }
 
-pub struct ParentCoordIter<'a, T: 'a> {
-    inner: ParentIter<'a, T>,
-}
-
-impl<'a, T> Iterator for ParentCoordIter<'a, T> {
-    type Item = (usize, usize, &'a T);
+impl<'grid, T> Iterator for ParentIter<'grid, T> {
+    type Item = ((usize, usize), &'grid T);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let x = self.inner.x;
-        let y = self.inner.y;
-        self.inner.next().map(|item| (x, y, item))
+        let res;
+        match self {
+            ParentIter::Done => return None,
+            ParentIter::Right { x, y, grid } => {
+                let (x, y) = (*x, *y);
+                res = Some(((x, y), grid.get(x, y)));
+                *self = ParentIter::Done;
+            }
+            ParentIter::Middle { x, y, grid } => {
+                let (x, y) = (*x, *y);
+                res = Some(((x, y), grid.get(x, y)));
+                if x == grid.width() - 1 {
+                    // The iterator can't move right without falling off the grid.
+                    *self = ParentIter::Done;
+                } else {
+                    *self = ParentIter::Right { x: x + 1, y, grid };
+                }
+            }
+            ParentIter::Left { x, y, grid } => {
+                let (x, y) = (*x, *y);
+                res = Some(((x, y), grid.get(x, y)));
+                if x == grid.width() - 1 {
+                    // The iterator can't move right without falling off the grid.
+                    // This shouldn't happen unless the grid somehow changed.
+                    *self = ParentIter::Done;
+                } else {
+                    *self = ParentIter::Middle { x: x + 1, y, grid };
+                }
+            }
+        }
+        res
     }
 }

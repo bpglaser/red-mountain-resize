@@ -207,8 +207,8 @@ impl Carver {
     fn get_parent_with_min_path_cost(&self, x: usize, y: usize) -> Option<(usize, usize)> {
         self.grid
             .iter_parents_with_coords(x, y)
-            .min_by_key(|&(_, _, pep)| pep.path_cost)
-            .map(|(x, y, _)| (x, y))
+            .min_by_key(|&((_, _), pep)| pep.path_cost)
+            .map(|(coord, _)| coord)
     }
 
     fn add_point(&mut self, x: usize, y: usize, pep: PixelEnergyPoint) {
@@ -337,8 +337,8 @@ mod tests {
         assert_eq!(get_medium_path(), carver.path);
     }
 
-    static SMALL: &'static [u8; 173] = include_bytes!("../tests/images/small_energy.png");
-    static MEDIUM: &'static [u8; 244] = include_bytes!("../tests/images/medium_energy.png");
+    static SMALL: &[u8] = include_bytes!("../tests/images/small_energy.png");
+    static MEDIUM: &[u8] = include_bytes!("../tests/images/medium_energy.png");
 
     fn get_small_pixel_energy() -> Vec<Vec<u32>> {
         vec![
