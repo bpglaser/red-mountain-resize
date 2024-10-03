@@ -1,7 +1,7 @@
 /.idea/
+/.vscode/
 /target/
 *.jpg
 *.png
 *.rs.bk
-
 .DS_Store
